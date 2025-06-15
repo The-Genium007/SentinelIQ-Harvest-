@@ -8,4 +8,4 @@ RUN npm install --frozen-lockfile
 
 COPY WireScout .
 
-CMD ["node", "start.js"]
+CMD ["node", "WireScanner/start.js"]
