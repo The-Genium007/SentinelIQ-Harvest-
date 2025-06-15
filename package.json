@@ -1,5 +1,5 @@
 {
-  "name": "rssparser",
+  "name": "sentineliq-harvest-",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -12,7 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
     "dotenv": "^16.5.0",
-    "rss-parser": "^3.13.0",
-    "supabase": "^2.24.3"
+    "node-cron": "^4.1.0",
+    "rss-parser": "^3.13.0"
   }
 }

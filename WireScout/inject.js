@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
 // Chargement des variables d'environnement depuis le fichier key.env
-dotenv.config({ path: './key.env' });
+dotenv.config({ path: '../key.env' });
 
 // Initialisation du client Supabase avec les clés d'accès
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
