@@ -6,6 +6,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install --frozen-lockfile
 
-COPY WireScout .
+# Copier tout le code — ou précision selon ta structure
+COPY . .
 
+# Lancer le bon script si le fichier start.js se trouve dans WireScanner
 CMD ["node", "WireScanner/start.js"]
