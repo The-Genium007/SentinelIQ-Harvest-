@@ -3,7 +3,7 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY WireScout/package.json WireScout/package-lock.json ./
+COPY package.json package-lock.json ./
 RUN npm install --frozen-lockfile
 
 COPY WireScout .
