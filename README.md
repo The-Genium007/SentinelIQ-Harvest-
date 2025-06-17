@@ -1,8 +1,8 @@
-# ToolBox PowerGlove
+# SentinelIG Harvest
 
 ## Présentation
 
-RssParser est un outil Node.js/Bun permettant de collecter des URLs d’articles à partir de flux RSS, puis de les injecter dans une base de données Supabase.  
+SentinelIG Harvest est un outil Node.js/Bun permettant de collecter des URLs d’articles à partir de flux RSS, puis de les injecter dans une base de données Supabase.  
 Le projet est organisé en deux dossiers principaux :
 
 - **WireScout** : injection des flux RSS dans la base (`ListUrlRss`)
