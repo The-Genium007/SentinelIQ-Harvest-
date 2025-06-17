@@ -5,11 +5,8 @@ dotenv.config({ path: '../key.env' });
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 import Parser from 'rss-parser';
-import fs from 'fs/promises';
-import path from 'path';
 
 const parser = new Parser();
-const filePath = path.resolve('articles.json');
 
 
 export async function crawlUrl() {
