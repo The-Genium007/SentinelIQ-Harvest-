@@ -11,16 +11,6 @@ import path from 'path';
 const parser = new Parser();
 const filePath = path.resolve('articles.json');
 
-// Fonction utilitaire pour charger les articles existants (si le fichier existe)
-const loadExistingArticles = async () => {
-    try {
-        const data = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(data);
-    } catch (err) {
-        // Retourne un tableau vide si le fichier n'existe pas ou est vide
-        return [];
-    }
-};
 
 export async function crawlUrl() {
     // Récupération des URLs de flux RSS depuis la table ListUrlRss de Supabase
