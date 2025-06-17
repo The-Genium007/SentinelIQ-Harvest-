@@ -1,15 +1,18 @@
-// cronWithFileLogging.js
+// Script de planification et d'exécution automatique du crawl RSS avec gestion des logs et des erreurs
 import cron from 'node-cron'
 import fs from 'fs'
 import path from 'path'
 
-// fichier a lancer
+// Import de la fonction principale de crawl
 import { crawlUrl } from './crawlUrl.js'
 
-// 📁 Configure le fichier de log
+// 📁 Chemin du fichier de log pour l'exécution des tâches
 const LOG_FILE = path.join(process.cwd(), 'cron-task.log')
 
-// Fonction utilitaire pour logguer dans le fichier + console
+/**
+ * Fonction utilitaire pour écrire un message dans le fichier de log et la console.
+ * @param {string} msg - Message à logger
+ */
 function logToFile(msg) {
     const ts = new Date().toISOString()
     const line = `[${ts}] ${msg}\n`
@@ -19,7 +22,9 @@ function logToFile(msg) {
     console.log(line.trim())
 }
 
-// ✅ Lance le script
+/**
+ * Exécute la tâche principale de crawl et log le résultat.
+ */
 async function executeTask() {
     logToFile('▶️ Lancement de crawlUrl')
     try {
@@ -31,7 +36,10 @@ async function executeTask() {
     }
 }
 
-// 🔁 Gestion des erreurs et retries
+/**
+ * Exécute la tâche avec gestion des erreurs et retries (jusqu'à 3 tentatives).
+ * @param {number} retries - Nombre de tentatives déjà effectuées
+ */
 async function safeExecute(retries = 0) {
     const MAX = 3
     try {
@@ -45,12 +53,12 @@ async function safeExecute(retries = 0) {
     }
 }
 
-// 🚫 Protection contre chevauchement
+// 🚫 Protection contre chevauchement d'exécution
 let running = false
 
-// 🕔 Planification cron
+// 🕔 Planification cron : tous les jours à 03:00 Europe/Paris
 const task = cron.schedule(
-    '0 3 * * *', // tous les jours à 03:00
+    '0 3 * * *',
     () => {
         if (running) {
             logToFile('⏭️ Tâche précédente toujours en cours, saut de cette exécution.')
@@ -67,14 +75,14 @@ const task = cron.schedule(
     }
 )
 
-// 🔍 Validation de l’expresssion cron
+// 🔍 Validation de l’expression cron au démarrage
 if (!cron.validate('0 3 * * *')) {
     throw new Error('🚫 Expression cron invalide')
 }
 
-// 📝 Démarrage
+// 📝 Démarrage du cron
 logToFile('🔄 Cron démarré – tous les jours à 03:00 Europe/Paris')
 
-// 📤 Permet de stopper/redémarrer si nécessaire
+// 📤 Fonctions pour stopper ou relancer la tâche cron dynamiquement
 export function stopTask() { task.stop(), logToFile('⏸️ Cron stoppé') }
 export function startTask() { task.start(), logToFile('▶️ Cron relancé') }
