@@ -1,5 +1,6 @@
 import { getRssFeeds, testSupabaseConnection, articleExists, insertArticle } from './supabaseUtils.js';
 import { parseFeed, isValidUrl } from './rssUtils.js';
+import { sendWebhook } from './webHook.js';
 
 /**
  * Fonction principale pour crawler les flux RSS et insérer les nouveaux articles dans la base Supabase.
@@ -66,4 +67,18 @@ export async function crawlUrl() {
  */
 function logScrapingCompletion(totalSources, totalArticles) {
     console.log(`✅ Scrapping terminé : ${totalSources} sources traitées, ${totalArticles} articles insérés.`);
+    // Envoi d'un webhook à la fin du scrapping
+    const WEBHOOK_URL = process.env.SCRAPING_WEBHOOK_URL;
+    if (WEBHOOK_URL) {
+        sendWebhook(WEBHOOK_URL, {
+            event: 'scraping_completed',
+            sources: totalSources,
+            articles: totalArticles,
+            timestamp: new Date().toISOString()
+        }).then(() => {
+            console.log('📡 Webhook envoyé avec succès.');
+        }).catch(err => {
+            console.error('❌ Erreur lors de l’envoi du webhook :', err.message);
+        });
+    }
 }
