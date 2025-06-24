@@ -38,25 +38,11 @@ bun install
    ```dotenv
    SUPABASE_URL=https://<ton-projet>.supabase.co
    SUPABASE_KEY=<ta-clé-supabase>
+   # (optionnel) URL d’un webhook appelé à la fin du scrapping
+   SCRAPING_WEBHOOK_URL=https://votre-serveur.com/webhook
    ```
 
    > Récupère ces informations dans Supabase > Project Settings > API.
-
-2. **Création des tables dans Supabase**
-
-   Dans le SQL Editor de Supabase, exécute :
-
-   ```sql
-   create table public."ListUrlRss" (
-     id serial primary key,
-     url text not null unique
-   );
-
-   create table public."articlesUrl" (
-     id serial primary key,
-     url text not null unique
-   );
-   ```
 
 ---
 
