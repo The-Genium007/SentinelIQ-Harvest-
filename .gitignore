@@ -11,12 +11,16 @@ coverage
 *.lcov
 
 # logs
-logs
-_.log
+*.log
+logs/
+*.log.*
+npm-debug.log*
+bun-debug.log*
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # dotenv environment variable files
 .env
+*.env
 .env.development.local
 .env.test.local
 .env.production.local

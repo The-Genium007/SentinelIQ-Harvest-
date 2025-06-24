@@ -1,6 +1,21 @@
 import { getRssFeeds, testSupabaseConnection, articleExists, insertArticle } from './supabaseUtils.js';
 import { parseFeed, isValidUrl } from './rssUtils.js';
 import { sendWebhook } from './webHook.js';
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
+
+// Charge le fichier .env situé dans le dossier parent
+dotenv.config({ path: '../key.env' });
+
+const LOG_FILE = path.join(process.cwd(), 'cron-task.log');
+
+function logToFile(msg) {
+    const ts = new Date().toISOString();
+    const line = `[${ts}] ${msg}\n`;
+    fs.appendFileSync(LOG_FILE, line);
+    console.log(line.trim());
+}
 
 /**
  * Fonction principale pour crawler les flux RSS et insérer les nouveaux articles dans la base Supabase.
@@ -60,25 +75,27 @@ export async function crawlUrl() {
     logScrapingCompletion(sources.length, totalArticlesInserted);
 }
 
+
 /**
  * Détecte la fin du scrapping et log un message de confirmation.
  * @param {number} totalSources - Nombre total de sources traitées
  * @param {number} totalArticles - Nombre total d'articles insérés
  */
 function logScrapingCompletion(totalSources, totalArticles) {
-    console.log(`✅ Scrapping terminé : ${totalSources} sources traitées, ${totalArticles} articles insérés.`);
+    const msg = `✅ Scrapping terminé : ${totalSources} sources traitées, ${totalArticles} articles insérés.`;
+    logToFile(msg);
     // Envoi d'un webhook à la fin du scrapping
-    const WEBHOOK_URL = process.env.SCRAPING_WEBHOOK_URL;
-    if (WEBHOOK_URL) {
-        sendWebhook(WEBHOOK_URL, {
+    const urlWebHook = process.env.SCRAPING_WEBHOOK_URL;
+    if (urlWebHook) {
+        sendWebhook(urlWebHook, {
             event: 'scraping_completed',
             sources: totalSources,
             articles: totalArticles,
             timestamp: new Date().toISOString()
         }).then(() => {
-            console.log('📡 Webhook envoyé avec succès.');
+            logToFile('📡 Webhook envoyé avec succès.');
         }).catch(err => {
-            console.error('❌ Erreur lors de l’envoi du webhook :', err.message);
+            logToFile('❌ Erreur lors de l’envoi du webhook : ' + err.message);
         });
     }
 }

@@ -1,8 +1,9 @@
-// Fonctions utilitaires pour la gestion de Supabase
-import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-// Chargement des variables d'environnement depuis le fichier key.env
-dotenv.config({ path: '../key.env' });
+
+// Charge le fichier .env situé dans le dossier parent
+dotenv.config({ path: './key.env' });
+
+import { createClient } from '@supabase/supabase-js';
 
 // Initialisation du client Supabase avec les clés d'environnement
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);

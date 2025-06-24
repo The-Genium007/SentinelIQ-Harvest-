@@ -3,6 +3,9 @@ import cron from 'node-cron'
 import fs from 'fs'
 import path from 'path'
 
+console.log("SUPABASE_URL =", process.env.SUPABASE_URL);
+console.log("SUPABASE_KEY =", process.env.SUPABASE_KEY);
+
 // Import de la fonction principale de crawl
 import { crawlUrl } from './crawlUrl.js'
 
