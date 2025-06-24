@@ -6,6 +6,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install --frozen-lockfile \
     add --no-cache 
+RUN apk add --no-cache curl
 
 ENV PORT=3000
 
