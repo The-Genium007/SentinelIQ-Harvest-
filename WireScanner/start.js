@@ -2,9 +2,8 @@
 import cron from 'node-cron'
 import fs from 'fs'
 import path from 'path'
+import http from 'http'
 
-console.log("SUPABASE_URL =", process.env.SUPABASE_URL);
-console.log("SUPABASE_KEY =", process.env.SUPABASE_KEY);
 
 // Import de la fonction principale de crawl
 import { crawlUrl } from './crawlUrl.js'
@@ -89,3 +88,17 @@ logToFile('🔄 Cron démarré – tous les jours à 03:00 Europe/Paris')
 // 📤 Fonctions pour stopper ou relancer la tâche cron dynamiquement
 export function stopTask() { task.stop(), logToFile('⏸️ Cron stoppé') }
 export function startTask() { task.start(), logToFile('▶️ Cron relancé') }
+
+// Serveur HTTP minimal pour le healthcheck Coolify
+const PORT = process.env.PORT || 3000
+http.createServer((req, res) => {
+    if (req.method === 'GET' && req.url === '/') {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end('OK')
+    } else {
+        res.writeHead(404, { 'Content-Type': 'text/plain' })
+        res.end('Not found')
+    }
+}).listen(PORT, () => {
+    logToFile(`🌐 Serveur HTTP healthcheck démarré sur le port ${PORT}`)
+})
