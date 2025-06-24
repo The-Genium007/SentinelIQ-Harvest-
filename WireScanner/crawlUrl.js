@@ -1,10 +1,3 @@
-// Importation des dépendances et utilitaires
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-dotenv.config({ path: '../key.env' });
-
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
 import { getRssFeeds, testSupabaseConnection, articleExists, insertArticle } from './supabaseUtils.js';
 import { parseFeed, isValidUrl } from './rssUtils.js';
 
@@ -19,6 +12,8 @@ export async function crawlUrl() {
     const sources = await getRssFeeds();
     // Vérification de la connexion à Supabase
     await testSupabaseConnection();
+
+    let totalArticlesInserted = 0; // Compteur pour les articles insérés
 
     // Parcours de chaque source RSS récupérée depuis la base
     for (const source of sources) {
@@ -42,6 +37,7 @@ export async function crawlUrl() {
                         if (!(await articleExists(articleUrl))) {
                             // Insertion de l'article s'il n'existe pas
                             await insertArticle(articleUrl);
+                            totalArticlesInserted++; // Incrémente le compteur
                             console.log(`✅ Article inséré : ${articleUrl}`);
                         } else {
                             // L'article existe déjà
@@ -58,4 +54,16 @@ export async function crawlUrl() {
             console.warn(`❌ Erreur lors du traitement du flux : ${source.url}`, err.message);
         }
     }
+
+    // Log de fin de scrapping
+    logScrapingCompletion(sources.length, totalArticlesInserted);
+}
+
+/**
+ * Détecte la fin du scrapping et log un message de confirmation.
+ * @param {number} totalSources - Nombre total de sources traitées
+ * @param {number} totalArticles - Nombre total d'articles insérés
+ */
+function logScrapingCompletion(totalSources, totalArticles) {
+    console.log(`✅ Scrapping terminé : ${totalSources} sources traitées, ${totalArticles} articles insérés.`);
 }
