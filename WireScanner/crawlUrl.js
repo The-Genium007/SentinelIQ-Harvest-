@@ -99,3 +99,10 @@ function logScrapingCompletion(totalSources, totalArticles) {
         });
     }
 }
+
+// Test manuel de la fonction logScrapingCompletion
+// Commande : TEST_LOG_SCRAPING_COMPLETION=1 bun run WireScanner/crawlUrl.js
+if (process.env.TEST_LOG_SCRAPING_COMPLETION === '1') {
+    logScrapingCompletion(2, 10); // exemple : 2 sources, 10 articles
+}
+
