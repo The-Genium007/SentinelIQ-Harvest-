@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { createServer } from 'http';
 import { logManager, LOG_TYPES, LOG_LEVELS } from './utils/logManager.js';
 
@@ -176,14 +176,39 @@ const createHealthServer = () => {
         log(`   • GET /health  - État général du système`, LOG_LEVELS.INFO);
         log(`   • GET /ready   - Vérification de disponibilité`, LOG_LEVELS.INFO);
         log(`   • GET /metrics - Métriques système`, LOG_LEVELS.INFO);
+
+        // Test immédiat de la healthcheck
+        setTimeout(() => {
+            testHealthcheck();
+        }, 2000);
     });
 
     server.on('error', (error) => {
         serviceStatus.healthServer = false;
         log(`❌ Erreur serveur healthcheck: ${error.message}`, LOG_LEVELS.ERROR);
+        if (error.code === 'EADDRINUSE') {
+            log(`🔧 Port ${PORT} déjà utilisé. Tentative sur port alternatif...`, LOG_LEVELS.WARN);
+        }
     });
 
     return server;
+};
+
+// Fonction de test de la healthcheck
+const testHealthcheck = () => {
+    const testProcess = spawn('curl', ['-s', '-f', `http://127.0.0.1:${PORT}/health`]);
+
+    testProcess.on('close', (code) => {
+        if (code === 0) {
+            log(`✅ Test healthcheck interne réussi`, LOG_LEVELS.SUCCESS);
+        } else {
+            log(`❌ Test healthcheck interne échoué (code: ${code})`, LOG_LEVELS.ERROR);
+        }
+    });
+
+    testProcess.on('error', (error) => {
+        log(`⚠️ Impossible de tester la healthcheck: ${error.message}`, LOG_LEVELS.WARN);
+    });
 };
 
 // Fonction principale

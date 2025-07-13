@@ -3,19 +3,25 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Installer curl et netcat pour le healthcheck
+RUN apk add --no-cache curl netcat-openbsd
+
 COPY package.json package-lock.json ./
-RUN npm install --frozen-lockfile \
-    apk add --no-cache curl
+RUN npm install --frozen-lockfile
 
 ENV PORT=3000
 
-HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl --fail http://localhost:3000/ || exit 1
+# Copier et configurer le script de healthcheck
+COPY healthcheck.sh /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD /usr/local/bin/healthcheck.sh
 
 EXPOSE 3000
 
-# Copier tout le code — ou précision selon ta structure
+# Copier tout le code
 COPY . .
 
-# Lancer le bon script si le fichier start.js se trouve dans WireScanner
-CMD ["node", "WireScanner/start.js"]
+# Lancer le serveur principal avec healthcheck intégré
+CMD ["node", "index.js"]

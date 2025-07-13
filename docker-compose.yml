@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  sentineliq-harvest:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - sentineliq-network
+
+networks:
+  sentineliq-network:
+    driver: bridge
