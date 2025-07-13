@@ -13,24 +13,45 @@ coverage
 # logs
 *.log
 logs/
+logs/*.log
+logs/archive/
+logs/backups/
 *.log.*
 npm-debug.log*
 bun-debug.log*
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
-# dotenv environment variable files
-.env
-*.env
+# Environment variables
 key.env
+.env
+.env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env.local
 
-# caches
+# SentinelIQ Harvest specific logs (legacy)
+cron-task.log
+cron-task.log.backup
+Cortex/scrap.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Bun lockfile (replaced by package-lock.json)
+bun.lockb
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
 .eslintcache
-.cache
-*.tsbuildinfo
+
+# Backup files
+*.backup
+*.old
 
 # IntelliJ based IDEs
 .idea

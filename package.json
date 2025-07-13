@@ -1,19 +1,61 @@
 {
-  "name": "sentineliq-harvest-",
-  "module": "index.ts",
+  "name": "sentineliq-harvest",
+  "version": "1.0.0",
+  "description": "SentinelIQ Harvest - Système de collecte et d'analyse d'articles",
+  "main": "index.js",
   "type": "module",
   "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "wire-scanner": "node WireScanner/start.js",
+    "wire-scanner:direct": "node -e \"import('./WireScanner/crawlUrl.js').then(m => m.crawlUrl())\"",
+    "wire-scanner:migrate": "TEST_MIGRATION=1 node WireScanner/migration.js",
+    "wire-scanner:benchmark": "node -e \"console.log('Benchmark WireScanner à implémenter')\"",
+    "scrapping": "node run-scrapping.js",
+    "cortex": "node Cortex/start.js",
+    "cortex:daemon": "node Cortex/daemon.js",
+    "cortex:once": "node Cortex/daemon.js --once",
+    "cortex:test": "node Cortex/platformTester.js",
+    "cortex:test-platform": "node Cortex/platformTester.js",
+    "cortex:install": "node Cortex/platformInstaller.js",
+    "diagnostic": "node diagnostic.js",
+    "logs:migrate": "node migrate-logs.js migrate",
+    "logs:clean": "node diagnostic.js clean",
+    "logs:analyze": "node diagnostic.js analyze",
+    "logs:summary": "node diagnostic.js summary",
+    "logs:test": "node test-logs.js",
+    "db:test": "node test-simple.js",
+    "db:test-full": "node test-database.js",
+    "db:compatibility": "node test-compatibility.js",
+    "db:schema": "node diagnostic-tables.js",
+    "db:health": "node -e \"import('./database/index.js').then(async ({DatabaseUtils}) => { const h = await DatabaseUtils.healthCheck(); console.log(JSON.stringify(h, null, 2)); })\"",
+    "db:stats": "node -e \"import('./database/index.js').then(async ({DatabaseUtils}) => { const s = await DatabaseUtils.getGlobalStats(); console.log(JSON.stringify(s, null, 2)); })\""
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "keywords": [
+    "sentinel",
+    "harvest",
+    "scraping",
+    "rss",
+    "articles"
+  ],
+  "author": "Lucas Giza",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
     "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "node-cron": "^4.1.0",
     "node-fetch": "^3.3.2",
+    "p-limit": "^5.0.0",
+    "puppeteer": "^22.0.0",
     "rss-parser": "^3.13.0"
   }
 }

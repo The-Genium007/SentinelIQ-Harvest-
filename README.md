@@ -1,127 +1,113 @@
-# SentinelIG Harvest
+# 🎯 SentinelIQ Harvest
 
-## Présentation
+Système de collecte et d'analyse d'articles via RSS avec intégration Cortex.
 
-SentinelIG Harvest est un outil Node.js/Bun permettant de collecter des URLs d’articles à partir de flux RSS, puis de les injecter dans une base de données Supabase.  
-Le projet est organisé en deux dossiers principaux :
+## 🌐 **Serveur Healthcheck intégré**
 
-- **WireScout** : injection des flux RSS dans la base (`ListUrlRss`)
-- **WireScanner** : récupération des articles à partir des flux et injection dans la base (`articlesUrl`), avec planification automatique (cron)
+Le système démarre automatiquement un serveur web de healthcheck pour Coolify :
 
----
+- **Port** : `3000` (configurable via `HEALTH_PORT`)
+- **Endpoints** :
+  - `GET /health` - État général du système avec métriques complètes
+  - `GET /ready` - Vérification de disponibilité des services (pour readiness probes)
+  - `GET /metrics` - Métriques système au format JSON
+- **Statuts** :
+  - `200` : Système fonctionnel
+  - `503` : Services non prêts (endpoint `/ready`)
+  - `404` : Endpoint non trouvé
 
-## Prérequis
-
-- [Bun](https://bun.sh) installé (`curl -fsSL https://bun.sh/install | bash`)
-- Node.js ≥ 18 (si besoin)
-- Un compte [Supabase](https://supabase.com/) et un projet créé
-- Accès à la console Supabase pour créer les tables
-
----
-
-## Installation
-
-Dans chaque dossier (`WireScout` et `WireScanner`) :
+### Configuration Coolify
 
 ```bash
-bun install
+# Variables d'environnement
+HEALTH_PORT=3000
+
+# Health check URL
+http://localhost:3000/health
 ```
 
----
+## 🚀 Scripts disponibles
 
-## Configuration
-
-1. **Variables d’environnement**
-
-   Crée un fichier `key.env` dans chaque dossier (`WireScout` et `WireScanner`) avec :
-
-   ```dotenv
-   SUPABASE_URL=https://<ton-projet>.supabase.co
-   SUPABASE_KEY=<ta-clé-supabase>
-   # (optionnel) URL d’un webhook appelé à la fin du scrapping
-   SCRAPING_WEBHOOK_URL=https://votre-serveur.com/webhook
-   ```
-
-   > Récupère ces informations dans Supabase > Project Settings > API.
-
----
-
-## Utilisation
-
-### 1. Injecter les flux RSS dans la base
-
-Depuis le dossier `WireScout` :
+### Scrapping et analyse
 
 ```bash
-bun run inject.js
+# Scrapping automatique (cron 03:00)
+npm run wire-scanner
+
+# Scrapping manuel (à la demande)
+npm run scrapping
+
+# Analyse Cortex
+npm run cortex
 ```
 
-- Lis les URLs du fichier [`feedsList.json`](WireScout/feedsList.json)
-- Insère les URLs dans la table `ListUrlRss` (sans doublons)
-
-### 2. Récupérer et injecter les articles depuis les flux
-
-Depuis le dossier `WireScanner` :
-
-- Pour lancer une récupération manuelle :
-
-  ```bash
-  bun run crawlUrl.js
-  ```
-
-- Pour lancer la récupération automatique chaque jour à 03:00 (Europe/Paris) :
-
-  ```bash
-  bun run start.js
-  ```
-
-  Les logs sont écrits dans `cron-task.log`.
-
-### 3. Tester la connexion Supabase
-
-Depuis `WireScanner` :
+### Base de données
 
 ```bash
-bun run "testSupabase.js 15-40-24-122.js"
+# Tests et diagnostics
+npm run db:test          # Test simple
+npm run db:test-full     # Test complet
+npm run db:health        # État de santé
+npm run db:schema        # Schéma des tables
+
+# Statistiques
+npm run db:stats         # Statistiques globales
 ```
 
----
+### Logs et diagnostic
 
-## Structure du projet
-
-```
-.
-├── WireScout/
-│   ├── feedsList.json
-│   ├── inject.js
-│   ├── key.env
-│   ├── package.json
-│   └── tsconfig.json
-├── WireScanner/
-│   ├── crawlUrl.js
-│   ├── start.js
-│   ├── key.env
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── cron-task.log
-│   └── testSupabase.js 15-40-24-122.js
-└── README.md
+```bash
+npm run logs:analyze     # Analyse des logs
+npm run logs:summary     # Résumé des logs
+npm run logs:clean       # Nettoyage
+npm run diagnostic       # Diagnostic complet
 ```
 
+## 🔧 Architecture
+
+```
+SentinelIQ Harvest/
+├── WireScanner/         # Collecte RSS
+├── Cortex/              # Analyse articles
+├── database/            # Couche base de données
+├── utils/               # Utilitaires (logs, etc.)
+└── logs/                # Fichiers de logs
+```
+
+## 📋 Workflow
+
+1. **WireScanner** : Collecte les articles RSS
+2. **Cortex** : Analyse et traite les articles
+3. **Database** : Stockage structuré
+4. **Logs** : Monitoring et diagnostic
+
+## ⚡ Utilisation rapide
+
+```bash
+# Lancer un scrapping maintenant
+npm run scrapping
+
+# Vérifier l'état de la base
+npm run db:health
+
+# Analyser les logs récents
+npm run logs:summary
+```
+
+## 📚 Documentation
+
+- [Guide du scrapping manuel](./SCRAPPING_MANUAL_GUIDE.md)
+- [Migration Webhook → Cortex](./WEBHOOK_TO_CORTEX_MIGRATION.md)
+- [Schéma de base de données](./DATABASE_SCHEMA_GUIDE.md)
+- [Guide des logs](./LOGS_GUIDE.md)
+- [Migration de base de données](./DATABASE_MIGRATION_GUIDE.md)
+
+## 🔄 Planification
+
+- **Scrapping automatique** : Tous les jours à 03:00 (Europe/Paris)
+- **Scrapping manuel** : À la demande via `npm run scrapping`
+- **Intégration Cortex** : Automatique après chaque scrapping
+
 ---
 
-## Dépannage
-
-- **Invalid API key** : Vérifie la clé dans `key.env` (copie-la bien depuis Supabase).
-- **RLS (Row Level Security) errors** : Ajoute une politique d’insertion dans Supabase si besoin.
-- **Problèmes de certificat SSL** : Certains flux peuvent avoir des certificats invalides, voir la doc ou ignorer temporairement les erreurs SSL (déconseillé en production).
-
----
-
-## Liens utiles
-
-- [Documentation Supabase](https://supabase.com/docs)
-- [Documentation Bun](https://bun.sh/docs)
-- [RSS Parser (npm)](https://www.npmjs.com/package/rss-parser)
-
----
+Pour plus de détails, consultez les guides de documentation spécifiques.
