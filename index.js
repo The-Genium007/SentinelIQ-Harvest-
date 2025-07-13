@@ -179,7 +179,7 @@ const createHealthServer = () => {
 
         // Test immédiat de la healthcheck
         setTimeout(() => {
-            testHealthcheck();
+            testHealthcheck(PORT);
         }, 2000);
     });
 
@@ -195,8 +195,8 @@ const createHealthServer = () => {
 };
 
 // Fonction de test de la healthcheck
-const testHealthcheck = () => {
-    const testProcess = spawn('curl', ['-s', '-f', `http://127.0.0.1:${PORT}/health`]);
+const testHealthcheck = (port) => {
+    const testProcess = spawn('curl', ['-s', '-f', `http://127.0.0.1:${port}/health`]);
 
     testProcess.on('close', (code) => {
         if (code === 0) {
