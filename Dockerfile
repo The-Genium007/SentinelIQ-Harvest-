@@ -17,10 +17,6 @@ ENV NODE_ENV=production
 ENV HEALTH_PORT=3000
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Copier et configurer le script de healthcheck
-COPY healthcheck.sh /usr/local/bin/healthcheck.sh
-RUN chmod +x /usr/local/bin/healthcheck.sh
-
 # Copier tout le code
 COPY . .
 
@@ -32,9 +28,9 @@ USER nodejs
 
 EXPOSE 3000
 
-# Healthcheck avec plus de tolérance
+# Healthcheck intégré simple
 HEALTHCHECK --interval=30s --timeout=15s --start-period=45s --retries=5 \
-    CMD /usr/local/bin/healthcheck.sh
+    CMD curl -f http://localhost:3000/health || exit 1
 
 # Lancer le serveur principal avec healthcheck intégré
 CMD ["node", "index.js"]
