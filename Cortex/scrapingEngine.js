@@ -16,6 +16,7 @@ class ScrapingEngine {
         this.isInitialized = false;
         this.poolSize = PERFORMANCE_CONFIG.BROWSER_POOL_SIZE;
         this.platformConfig = null;
+        this.puppeteerCompatible = true; // Par défaut compatible, sera mis à jour lors de l'initialisation
     }
 
     /**
@@ -45,17 +46,33 @@ class ScrapingEngine {
             }
 
             this.isInitialized = true;
+            this.puppeteerCompatible = true; // Puppeteer disponible et fonctionnel
             logger.success(`✅ Pool de navigateurs initialisé (${this.poolSize} instances)`, 'ScrapingEngine');
 
         } catch (error) {
             logger.error(`❌ Erreur initialisation pool navigateurs: ${error.message}`, 'ScrapingEngine');
             
-            // En production/conteneur, on continue sans Puppeteer
+            // En mode conteneur, on réduit les exigences mais on essaie quand même
             if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
-                logger.warning('⚠️ Initialisation ScrapingEngine en mode dégradé (sans Puppeteer)', 'ScrapingEngine');
-                this.isInitialized = true;
-                this.poolSize = 0;
-                return;
+                logger.warning('⚠️ Erreur Puppeteer en conteneur - Tentative avec configuration réduite', 'ScrapingEngine');
+                
+                try {
+                    // Tentative avec un pool réduit (1 navigateur seulement)
+                    this.poolSize = 1;
+                    const browser = await puppeteerManager.getBrowserFromPool('container-single');
+                    this.browserPool.push(browser);
+                    this.isInitialized = true;
+                    this.puppeteerCompatible = true;
+                    logger.success('✅ Pool réduit initialisé pour conteneur (1 navigateur)', 'ScrapingEngine');
+                    return;
+                } catch (containerError) {
+                    logger.error(`❌ Échec total Puppeteer en conteneur: ${containerError.message}`, 'ScrapingEngine');
+                    logger.warning('⚠️ Initialisation ScrapingEngine en mode dégradé (sans Puppeteer)', 'ScrapingEngine');
+                    this.isInitialized = true;
+                    this.poolSize = 0;
+                    this.puppeteerCompatible = false; // Puppeteer non disponible
+                    return;
+                }
             }
             
             throw error;
@@ -117,8 +134,8 @@ class ScrapingEngine {
             await this.initialize();
         }
 
-        // En mode conteneur/production, on refuse l'utilisation de Puppeteer
-        if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
+        // En mode conteneur, vérifier si Puppeteer est disponible
+        if (process.env.DOCKER_ENV && !this.puppeteerCompatible) {
             throw new Error('Puppeteer non disponible en mode conteneur - utiliser un mode alternatif');
         }
 

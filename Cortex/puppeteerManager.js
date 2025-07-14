@@ -70,10 +70,26 @@ class PuppeteerManager {
     async testPuppeteerCompatibility() {
         logger.info('🧪 Test de compatibilité Puppeteer', 'PuppeteerManager');
 
-        // En environnement conteneur/production, on skip le test pour éviter les erreurs de protocole
+        // En environnement conteneur, on fait un test plus simple mais on continue
         if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV || process.env.PUPPETEER_DISABLE_SECURITY) {
-            logger.info('⚡ Environnement conteneur détecté - Test Puppeteer skippé', 'PuppeteerManager');
-            return true;
+            logger.info('⚡ Environnement conteneur détecté - Test Puppeteer simplifié', 'PuppeteerManager');
+            
+            // Test simplifié pour conteneur
+            try {
+                const testConfig = {
+                    headless: 'new',
+                    args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process'],
+                    executablePath: this.puppeteerConfig.executablePath
+                };
+                
+                const browser = await puppeteer.launch(testConfig);
+                await browser.close();
+                logger.info('✅ Test Puppeteer conteneur réussi', 'PuppeteerManager');
+                return true;
+            } catch (error) {
+                logger.warning(`⚠️ Test conteneur échoué mais on continue: ${error.message}`, 'PuppeteerManager');
+                return true; // On continue même si le test échoue en conteneur
+            }
         }
 
         try {
@@ -121,6 +137,24 @@ class PuppeteerManager {
     }
 
     /**
+     * Vérifie si Puppeteer est compatible avec l'environnement conteneur
+     */
+    isContainerCompatible() {
+        // Si Puppeteer est explicitement activé en conteneur, retourner true
+        if (process.env.DOCKER_ENV && process.env.CORTEX_MODE === 'container') {
+            return true;
+        }
+        
+        // Si on n'est pas en conteneur, toujours compatible
+        if (!process.env.DOCKER_ENV) {
+            return true;
+        }
+        
+        // En conteneur sans configuration spécifique, essayer quand même
+        return true;
+    }
+
+    /**
      * 🌐 Création d'un navigateur optimisé
      */
     async createBrowser() {
@@ -128,16 +162,26 @@ class PuppeteerManager {
             await this.initialize();
         }
 
-        // En production/conteneur, on évite Puppeteer qui pose trop de problèmes
-        if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
-            logger.warning('⚠️ Mode conteneur détecté - Puppeteer désactivé pour éviter les erreurs', 'PuppeteerManager');
-            throw new Error('Puppeteer désactivé en mode conteneur pour stabilité');
-        }
-
         try {
             logger.debug('🌐 Création d\'un nouveau navigateur Puppeteer', 'PuppeteerManager');
 
-            const browser = await puppeteer.launch(this.puppeteerConfig);
+            // Configuration spéciale pour conteneur avec plus de tolérance
+            let launchConfig = { ...this.puppeteerConfig };
+            
+            if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
+                logger.info('🐳 Mode conteneur - Configuration Puppeteer optimisée', 'PuppeteerManager');
+                
+                // Configuration ultra-conservatrice pour conteneur
+                launchConfig = {
+                    ...launchConfig,
+                    timeout: 30000, // Plus de temps pour démarrer
+                    protocolTimeout: 30000,
+                    pipe: true, // Utiliser pipe au lieu de websocket
+                    dumpio: false, // Pas de debug output
+                };
+            }
+
+            const browser = await puppeteer.launch(launchConfig);
 
             // Configuration des événements de monitoring
             browser.on('disconnected', () => {

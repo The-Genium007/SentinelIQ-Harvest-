@@ -1,6 +1,6 @@
-# 🐳 Test Local avec Conditions Coolify Identiques
+# 🐳 Test Local avec Conditions Coolify Identiques (OrbStack)
 
-Ce guide te permet de reproduire exactement l'environnement Coolify/Alpine Linux en local pour déboguer avant déploiement.
+Ce guide te permet de reproduire exactement l'environnement Coolify/Alpine Linux en local avec OrbStack pour déboguer avant déploiement.
 
 ## 🎯 Objectif
 Tester SentinelIQ Harvest dans les mêmes conditions que le déploiement Coolify :
@@ -8,6 +8,30 @@ Tester SentinelIQ Harvest dans les mêmes conditions que le déploiement Coolify
 - Variables d'environnement identiques
 - Port 3000 exposé
 - Mode production
+- **Utilisation exclusive d'OrbStack** (plus rapide et efficace que Docker Desktop)
+
+## 📋 Prérequis OrbStack
+
+### 1. Installation d'OrbStack
+```bash
+# Option 1: Téléchargement direct
+# Va sur https://orbstack.dev/ et télécharge l'app
+
+# Option 2: Homebrew (recommandé)
+brew install orbstack
+
+# Option 3: Mas App Store
+# Cherche "OrbStack" dans l'App Store
+```
+
+### 2. Lancement d'OrbStack
+```bash
+# Script automatique fourni
+./start-orbstack.sh
+
+# Ou manuellement
+open -a OrbStack
+```
 
 ## 🚀 Setup Rapide
 
@@ -210,13 +234,16 @@ echo "  🛑 Arrêter le test : docker-compose -f docker-compose.test.yml down"
 
 ## 🔧 Utilisation
 
-### Démarrage rapide
+### Démarrage rapide avec OrbStack
 ```bash
-# Donner les permissions d'exécution
-chmod +x test-local-coolify.sh
+# 1. S'assurer qu'OrbStack est lancé
+./start-orbstack.sh
 
-# Lancer le test
-./test-local-coolify.sh
+# 2. Lancer le test (configure Supabase d'abord)
+./start-test.sh
+
+# 3. Debug en cas de problème
+./debug-quick.sh
 ```
 
 ### Commandes utiles pendant le test

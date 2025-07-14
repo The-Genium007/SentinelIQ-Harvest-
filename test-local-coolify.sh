@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🐳 TEST LOCAL - Conditions Coolify Identiques"
-echo "============================================="
+echo "🐳 TEST LOCAL - Conditions Coolify Identiques (OrbStack)"
+echo "======================================================="
 
 # Couleurs pour les logs
 RED='\033[0;31m'
@@ -27,13 +27,23 @@ warning() {
     echo -e "${YELLOW}⚠️ $1${NC}"
 }
 
-# 1. Nettoyage préalable
-log "Nettoyage des containers existants..."
-docker-compose -f docker-compose.test.yml down --remove-orphans
-docker system prune -f
+# 1. Vérification préalable de OrbStack
+log "Vérification d'OrbStack..."
+if ! docker info > /dev/null 2>&1; then
+    error "OrbStack n'est pas disponible"
+    warning "Lance d'abord: ./start-orbstack.sh"
+    warning "Ou lance OrbStack manuellement depuis les Applications"
+    exit 1
+fi
+success "OrbStack opérationnel"
 
-# 2. Build du container de test
-log "Build du container de test (Alpine Linux)..."
+# 2. Nettoyage préalable
+log "Nettoyage des containers existants..."
+docker-compose -f docker-compose.test.yml down --remove-orphans 2>/dev/null || true
+docker system prune -f 2>/dev/null || true
+
+# 3. Build du container de test
+log "Build du container de test (Alpine Linux via OrbStack)..."
 if docker-compose -f docker-compose.test.yml build; then
     success "Build réussi"
 else
@@ -41,7 +51,7 @@ else
     exit 1
 fi
 
-# 3. Démarrage du container
+# 4. Démarrage du container
 log "Démarrage du container de test..."
 if docker-compose -f docker-compose.test.yml up -d; then
     success "Container démarré"
@@ -50,11 +60,11 @@ else
     exit 1
 fi
 
-# 4. Attendre le démarrage
+# 5. Attendre le démarrage
 log "Attente du démarrage des services (60s)..."
 sleep 60
 
-# 5. Tests de santé
+# 6. Tests de santé
 log "Test des endpoints de santé..."
 
 # Test /health
@@ -78,12 +88,12 @@ else
     error "Endpoint /metrics ÉCHEC"
 fi
 
-# 6. Affichage des logs
+# 7. Affichage des logs
 log "Logs des dernières 50 lignes :"
 echo "================================"
 docker-compose -f docker-compose.test.yml logs --tail=50
 
-# 7. Status des services
+# 8. Status des services
 log "Status des services :"
 echo "===================="
 curl -s http://localhost:3000/health | jq . 2>/dev/null || curl -s http://localhost:3000/health

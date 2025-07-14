@@ -22,6 +22,18 @@ export const PERFORMANCE_CONFIG = {
     BATCH_SIZE: 20,                    // Taille des lots pour traitement
     PROCESSING_DELAY: 200,             // Délai entre les lots (ms)
     GC_INTERVAL: 120000,               // Intervalle de garbage collection forcé (2 min)
+
+    // Optimisations spécifiques au mode conteneur
+    CONTAINER_MODE: process.env.CORTEX_MODE === 'container',
+    CONTAINER_OPTIMIZED: {
+        MAX_CONCURRENT_ARTICLES: 1,    // Un seul article à la fois en conteneur
+        MAX_CONCURRENT_BROWSERS: 1,    // Un seul navigateur en conteneur
+        BROWSER_POOL_SIZE: 1,          // Pool réduit
+        PAGE_TIMEOUT: 15000,           // Plus de temps pour les conteneurs
+        RETRY_ATTEMPTS: 2,             // Moins de retry
+        PROCESSING_DELAY: 500,         // Plus de délai entre traitements
+        BATCH_SIZE: 5,                 // Lots plus petits
+    }
 };
 
 export const SCRAPING_CONFIG = {
@@ -288,6 +300,65 @@ export const PLATFORM_CONFIG = {
                 '--memory-pressure-off'
             ],
             executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser', // Chemin configurable via env
+        },
+
+        // Configuration spécifique CONTENEUR Docker/Alpine
+        CONTAINER: {
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+                '--disable-gpu',
+                '--disable-web-security',
+                '--disable-features=TranslateUI,VizDisplayCompositor,AudioServiceOutOfProcess',
+                '--disable-ipc-flooding-protection',
+                '--disable-extensions-file-access-check',
+                '--disable-extensions-http-throttling',
+                '--disable-plugins-discovery',
+                '--disable-default-apps',
+                '--disable-background-timer-throttling',
+                '--disable-renderer-backgrounding',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-client-side-phishing-detection',
+                '--disable-sync',
+                '--disable-translate',
+                '--hide-scrollbars',
+                '--mute-audio',
+                '--no-default-browser-check',
+                '--disable-logging',
+                '--disable-permissions-api',
+                '--ignore-certificate-errors',
+                '--ignore-ssl-errors',
+                '--ignore-certificate-errors-spki-list',
+                '--ignore-certificate-errors-skip-list',
+                '--disable-extensions',
+                '--memory-pressure-off',
+                '--disable-shared-memory-usage',
+                '--disable-software-rasterizer',
+                '--disable-background-networking',
+                '--disable-default-apps',
+                '--disable-sync',
+                '--disable-translate',
+                '--metrics-recording-only',
+                '--safebrowsing-disable-auto-update',
+                '--disable-session-crashed-bubble',
+                '--disable-breakpad',
+                '--no-crash-upload',
+                '--disable-crash-reporter',
+                '--disable-hang-monitor',
+                '--disable-prompt-on-repost',
+                '--disable-client-side-phishing-detection',
+                '--disable-component-update',
+                '--disable-domain-reliability',
+                '--disable-features=TranslateUI',
+                '--blink-settings=imagesEnabled=false',
+                '--disable-features=VizDisplayCompositor'
+            ],
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
         }
     },
 
@@ -304,6 +375,12 @@ export const PLATFORM_CONFIG = {
             GC_INTERVAL: 120000, // 2 minutes
             BROWSER_POOL_SIZE: 2,
             MAX_CONCURRENT_PAGES: 3
+        },
+        CONTAINER: {
+            MAX_MEMORY_USAGE: 256 * 1024 * 1024, // 256MB (très conservateur)
+            GC_INTERVAL: 60000, // 1 minute
+            BROWSER_POOL_SIZE: 1, // Un seul navigateur en conteneur
+            MAX_CONCURRENT_PAGES: 1 // Une seule page à la fois
         }
     },
 
@@ -318,6 +395,11 @@ export const PLATFORM_CONFIG = {
             TIMEOUT: 45000, // Plus long pour les serveurs
             RETRY_ATTEMPTS: 5,
             CONCURRENT_REQUESTS: 5 // Plus conservateur
+        },
+        CONTAINER: {
+            TIMEOUT: 20000, // Plus court pour conteneur
+            RETRY_ATTEMPTS: 2, // Moins de retry
+            CONCURRENT_REQUESTS: 2 // Très conservateur
         }
     }
 };
@@ -327,6 +409,14 @@ export const PLATFORM_CONFIG = {
  */
 export async function detectPlatform() {
     const config = { ...PLATFORM_CONFIG };
+    
+    // Détection de l'environnement conteneur
+    const isContainer = process.env.DOCKER_ENV || 
+                       process.env.KUBERNETES_SERVICE_HOST || 
+                       process.env.CONTAINER_ENV ||
+                       process.env.NODE_ENV === 'production';
+    
+    config.IS_CONTAINER = isContainer;
 
     if (config.IS_LINUX) {
         try {
@@ -343,7 +433,7 @@ export async function detectPlatform() {
             config.IS_DEBIAN = osRelease.includes('debian') || osRelease.includes('ubuntu');
             config.IS_ALPINE = osRelease.includes('alpine');
 
-            // Vérification de l'exécutable Chromium avec priorité Alpine
+            // Vérification de l'exécutable Chromium avec priorité Alpine et conteneur
             const chromiumPaths = config.IS_ALPINE ? [
                 '/usr/bin/chromium-browser', // Alpine Linux
                 '/usr/bin/chromium'
@@ -357,6 +447,7 @@ export async function detectPlatform() {
             for (const path of chromiumPaths) {
                 if (fs.existsSync(path)) {
                     config.PUPPETEER.DEBIAN.executablePath = path;
+                    config.PUPPETEER.CONTAINER.executablePath = path;
                     break;
                 }
             }
@@ -375,7 +466,13 @@ export async function detectPlatform() {
 export function getPuppeteerConfig(platformConfig = PLATFORM_CONFIG) {
     const commonConfig = platformConfig.PUPPETEER.COMMON;
 
-    if (platformConfig.IS_MACOS) {
+    // Priorité aux conteneurs
+    if (platformConfig.IS_CONTAINER) {
+        return {
+            ...commonConfig,
+            ...platformConfig.PUPPETEER.CONTAINER
+        };
+    } else if (platformConfig.IS_MACOS) {
         return {
             ...commonConfig,
             ...platformConfig.PUPPETEER.MACOS
@@ -395,7 +492,14 @@ export function getPuppeteerConfig(platformConfig = PLATFORM_CONFIG) {
  * ⚡ Obtient la configuration de performance pour la plateforme actuelle
  */
 export function getPerformanceConfig(platformConfig = PLATFORM_CONFIG) {
-    if (platformConfig.IS_MACOS) {
+    // Priorité aux conteneurs
+    if (platformConfig.IS_CONTAINER) {
+        return {
+            ...PERFORMANCE_CONFIG,
+            ...platformConfig.MEMORY.CONTAINER,
+            ...platformConfig.NETWORK.CONTAINER
+        };
+    } else if (platformConfig.IS_MACOS) {
         return {
             ...PERFORMANCE_CONFIG,
             ...platformConfig.MEMORY.MACOS,

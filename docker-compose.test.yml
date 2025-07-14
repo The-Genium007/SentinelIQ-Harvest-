@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   sentineliq-test:
     build:
@@ -8,17 +6,19 @@ services:
     container_name: sentineliq-harvest-test
     ports:
       - "3000:3000"
+    env_file:
+      - .env
+      - key.env
+      - .env.container
     environment:
-      # Variables identiques à Coolify
-      - NODE_ENV=production
-      - PORT=3000
-      - HEALTH_PORT=3000
-      - NODE_OPTIONS=--max-old-space-size=2048
+      # Variables spécifiques au conteneur de test optimisé pour Puppeteer
       - DOCKER_ENV=true
-      - PUPPETEER_DISABLE_SECURITY=true
-      # ⚠️ Remplace par tes vraies variables Supabase
-      - SUPABASE_URL=your_supabase_url_here
-      - SUPABASE_ANON_KEY=your_supabase_anon_key_here
+      - CONTAINER_ENV=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - CORTEX_MODE=container
+      - NODE_OPTIONS=--max-old-space-size=256
+      # Variables Supabase chargées automatiquement depuis key.env
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]

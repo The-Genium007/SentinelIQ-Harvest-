@@ -1,20 +1,31 @@
-# 🔧 Scripts de Debug Coolify
+# 🔧 Scripts de Debug Coolify avec OrbStack
 
-Collection de scripts pour déboguer rapidement ton application dans les conditions Coolify.
+Collection de scripts pour déboguer rapidement ton application dans les conditions Coolify en utilisant OrbStack.
 
-## 🚀 Utilisation Rapide
+## 🚀 Utilisation Rapide avec OrbStack
 
 ```bash
-# Lancement complet avec vérifications
+# 1. Lance OrbStack (si pas déjà fait)
+./start-orbstack.sh
+
+# 2. Lancement complet avec vérifications
 ./start-test.sh
 
-# Ou directement le test (si Supabase déjà configuré)
-./test-local-coolify.sh
+# 3. Debug si problème
+./debug-quick.sh
 ```
+
+## 📋 Pourquoi OrbStack ?
+
+- ⚡ **Plus rapide** - Démarrage instantané vs Docker Desktop
+- 🧠 **Moins de RAM** - Consommation mémoire optimisée
+- 🔋 **Économie batterie** - Moins gourmand en ressources
+- 🐳 **100% compatible** - Mêmes commandes Docker
+- 🚀 **Natif Apple Silicon** - Optimisé pour M1/M2
 
 ## 📋 Commandes de Debug
 
-### Pendant le test
+### Pendant le test avec OrbStack
 ```bash
 # Logs en temps réel
 docker-compose -f docker-compose.test.yml logs -f
@@ -28,16 +39,16 @@ curl http://localhost:3000/ready
 curl http://localhost:3000/metrics
 ```
 
-### Debug spécifique
+### Debug spécifique OrbStack
 ```bash
-# Voir les variables d'environnement
+# Status OrbStack
+orb status
+
+# Voir les machines OrbStack
+orb list
+
+# Variables d'environnement dans le container
 docker exec -it sentineliq-harvest-test printenv | grep -E "(NODE_ENV|PORT|SUPABASE)"
-
-# Tester Chromium
-docker exec -it sentineliq-harvest-test chromium-browser --version
-
-# Voir les processus
-docker exec -it sentineliq-harvest-test ps aux
 ```
 
 ## 🛑 Arrêter le test

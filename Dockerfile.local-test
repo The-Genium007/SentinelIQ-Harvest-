@@ -17,7 +17,7 @@ RUN apk add --no-cache \
     freetype-dev \
     harfbuzz \
     ca-certificates \
-    fonts-liberation \
+    ttf-freefont \
     bash \
     curl
 
