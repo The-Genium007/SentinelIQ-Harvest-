@@ -174,8 +174,8 @@ class PuppeteerManager {
                 // Configuration ultra-conservatrice pour conteneur
                 launchConfig = {
                     ...launchConfig,
-                    timeout: 30000, // Plus de temps pour démarrer
-                    protocolTimeout: 30000,
+                    timeout: 60000, // 60s pour démarrer (au lieu de 30s)
+                    protocolTimeout: 60000, // 60s pour les protocoles (au lieu de 30s)
                     pipe: true, // Utiliser pipe au lieu de websocket
                     dumpio: false, // Pas de debug output
                 };

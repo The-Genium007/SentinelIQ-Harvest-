@@ -39,7 +39,7 @@ async function testCortexDataFlow() {
             title: 'Test Article Cortex - ' + new Date().toISOString(),
             content: 'Contenu de test pour vérifier la sauvegarde Cortex. Article créé le ' + new Date().toLocaleDateString('fr-FR'),
             author: 'Test Cortex',
-            date: new Date().toISOString(),
+            publishDate: new Date().toISOString(),
             extractedAt: new Date().toISOString()
         };
 

@@ -3,7 +3,7 @@
  * 🔍 Diagnostic complet des deux tables: articlesUrl ET articles
  */
 
-import { supabaseClient } from './database/client.js';
+import { supabaseClient } from '../../database/client.js';
 
 async function checkBothTables() {
     console.log('🔍 Diagnostic complet des tables articlesUrl ET articles...\n');

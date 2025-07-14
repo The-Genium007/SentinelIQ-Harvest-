@@ -197,10 +197,17 @@ class ScrapingEngine {
     async scrapeArticle(url) {
         const startTime = Date.now();
 
+        // Nettoyer l'URL (retirer espaces, retours à la ligne, etc.)
+        const cleanUrl = url.trim().replace(/\s+/g, '');
+        
+        if (!cleanUrl || !this.isValidUrl(cleanUrl)) {
+            throw new Error(`URL invalide: ${url}`);
+        }
+
         // Vérifier le cache d'abord
-        const cached = cortexPerformanceManager.getArticleFromCache(url);
+        const cached = cortexPerformanceManager.getArticleFromCache(cleanUrl);
         if (cached) {
-            logger.debug(`📦 Article récupéré du cache: ${url}`, 'ScrapingEngine');
+            logger.debug(`📦 Article récupéré du cache: ${cleanUrl}`, 'ScrapingEngine');
             return cached;
         }
 
@@ -214,9 +221,9 @@ class ScrapingEngine {
             await this.optimizePage(page);
 
             // Navigation avec optimisations
-            logger.debug(`🕷️ Scraping: ${url}`, 'ScrapingEngine');
+            logger.debug(`🕷️ Scraping: ${cleanUrl}`, 'ScrapingEngine');
 
-            await page.goto(url, {
+            await page.goto(cleanUrl, {
                 waitUntil: 'domcontentloaded',
                 timeout: PERFORMANCE_CONFIG.PAGE_TIMEOUT
             });
@@ -467,6 +474,18 @@ class ScrapingEngine {
         this.isInitialized = false;
 
         logger.info('✅ Moteur de scraping nettoyé', 'ScrapingEngine');
+    }
+
+    /**
+     * Valide si une URL est correcte
+     */
+    isValidUrl(url) {
+        try {
+            const urlObj = new URL(url);
+            return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+        } catch {
+            return false;
+        }
     }
 }
 

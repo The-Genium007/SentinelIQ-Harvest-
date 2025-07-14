@@ -28,7 +28,7 @@ async function testWithRealisticArticle() {
             En conclusion, une approche méthodique et l'utilisation d'outils appropriés permettent d'obtenir
             des performances optimales pour les applications web modernes.`,
             author: 'Expert Web Performance',
-            date: new Date().toISOString(),
+            publishDate: new Date().toISOString(),
             extractedAt: new Date().toISOString()
         };
 

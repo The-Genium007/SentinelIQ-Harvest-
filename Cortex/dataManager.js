@@ -60,11 +60,16 @@ class CortexDataManager {
             let articlesToProcess = articleUrls;
 
             if (onlyUnprocessed) {
-                const filteredArticles = [];
+                // Optimisation: Une seule requête pour récupérer toutes les URLs existantes
+                const existingUrls = await this.getAllProcessedUrls();
+                const existingUrlsSet = new Set(existingUrls);
 
+                const filteredArticles = [];
                 for (const article of articleUrls) {
-                    const alreadyProcessed = await this.isArticleProcessed(article.url);
-                    if (!alreadyProcessed) {
+                    const cleanUrl = article.url.trim(); // Nettoyer l'URL
+                    if (!existingUrlsSet.has(cleanUrl)) {
+                        // Nettoyer l'URL dans l'objet article
+                        article.url = cleanUrl;
                         filteredArticles.push(article);
                     } else {
                         this.stats.duplicatesSkipped++;
@@ -407,6 +412,25 @@ class CortexDataManager {
         } catch (error) {
             // En cas d'erreur, retourner la date du jour
             return new Date().toISOString().split('T')[0];
+        }
+    }
+
+    /**
+     * Récupère toutes les URLs déjà traitées pour optimiser la vérification des doublons
+     * @returns {Promise<Array>} Liste des URLs déjà traitées
+     */
+    async getAllProcessedUrls() {
+        try {
+            const processedArticles = await this.articleRepo.find({
+                select: 'url',
+                filters: {},
+                limit: 10000 // Limite raisonnable
+            });
+
+            return processedArticles.map(article => article.url.trim());
+        } catch (error) {
+            logger.error(`❌ Erreur lors de la récupération des URLs traitées: ${error.message}`, 'CortexDataManager');
+            return [];
         }
     }
 }
