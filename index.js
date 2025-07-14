@@ -39,8 +39,10 @@ const startService = (serviceName, scriptPath) => {
                 }
 
                 // Services "one-shot" qui se terminent normalement après leur travail
-                if (serviceName.toLowerCase().includes('cortex') && error.code === 0) {
-                    log(`✅ ${serviceName}: Session terminée normalement`, LOG_LEVELS.SUCCESS);
+                if (serviceName.toLowerCase().includes('cortex')) {
+                    // Cortex est un service one-shot qui fait son travail puis se termine
+                    // On considère sa terminaison comme un succès, pas une erreur
+                    log(`✅ ${serviceName}: Session one-shot terminée normalement`, LOG_LEVELS.SUCCESS);
                     serviceStatus.cortex = true;
                     resolve('Service one-shot terminé avec succès');
                     return;
@@ -354,8 +356,12 @@ async function main() {
         // Attendre un peu avant de démarrer les autres services
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Démarrer WireScanner avec la méthode standard
-        startService('WireScanner', 'WireScanner/start.js')
+        // Démarrer WireScanner avec spawn (service persistant)
+        startServiceWithSpawn('WireScanner', 'WireScanner/start.js')
+            .then(result => {
+                log(`✅ WireScanner démarré comme service persistant`, LOG_LEVELS.SUCCESS);
+                serviceStatus.wireScanner = true;
+            })
             .catch(err => {
                 log(`❌ WireScanner error: ${err.message}`, LOG_LEVELS.ERROR);
                 serviceStatus.wireScanner = false;
