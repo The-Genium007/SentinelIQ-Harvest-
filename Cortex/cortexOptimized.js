@@ -306,7 +306,7 @@ class CortexOptimized {
                 ...scrapedContent,
                 originalTitle: article.titre,
                 originalDescription: article.description,
-                originalDate: article.datePublication,
+                publishDate: scrapedContent.publishDate || article.datePublication,
                 processingTime: Date.now() - articleStart
             };
 

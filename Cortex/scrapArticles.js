@@ -125,19 +125,19 @@ async function scrapeArticle(url) {
                 title: document.title || document.querySelector('h1')?.innerText || '',
                 url: window.location.href,
                 content: getMainText(),
-                date: document.querySelector('time')?.getAttribute('datetime') || ''
+                publishDate: document.querySelector('time')?.getAttribute('datetime') || ''
             };
         });
 
         // Nettoyage : suppression des retours à la ligne du contenu
         data.content = data.content.replace(/\n/g, ' ');
         // Ajoute la date du jour si absente, au format YYYY-MM-DD
-        if (!data.date) {
+        if (!data.publishDate) {
             const now = new Date();
             const yyyy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
-            data.date = `${yyyy}-${mm}-${dd}`;
+            data.publishDate = `${yyyy}-${mm}-${dd}`;
         }
         return data;
 

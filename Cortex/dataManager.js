@@ -147,12 +147,12 @@ class CortexDataManager {
                 }
             }
 
-            // Préparation des données pour la base (schéma réel: id, created_at, url, title, content, date)
+            // Préparation des données pour la base (schéma réel: id, created_at, url, title, content, publishDate)
             const dbData = {
                 url: validatedData.url,
                 title: validatedData.title,
                 content: validatedData.content,
-                date: this.formatDateForDB(validatedData.date)
+                publishDate: this.formatDateForDB(validatedData.publishDate)
             };
 
             // Insertion dans la base
@@ -266,7 +266,7 @@ class CortexDataManager {
             url: articleData.url.trim(),
             title: this.cleanText(articleData.title),
             content: this.cleanText(articleData.content),
-            date: articleData.date || new Date().toISOString(),
+            publishDate: articleData.publishDate || new Date().toISOString(),
             author: this.cleanText(articleData.author || ''),
             extractedAt: articleData.extractedAt || new Date().toISOString()
         };

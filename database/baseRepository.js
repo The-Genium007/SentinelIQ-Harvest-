@@ -283,6 +283,7 @@ export class BaseRepository {
                 .single();
 
             if (error) {
+                logger.error(`❌ [BaseRepository.create] Erreur Supabase: ${JSON.stringify(error, null, 2)}`, 'BaseRepository');
                 throw new Error(`Erreur lors de l'insertion: ${error.message}`);
             }
 

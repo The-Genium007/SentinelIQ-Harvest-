@@ -320,7 +320,7 @@ class ScrapingEngine {
             return {
                 title: title.trim(),
                 content: content.trim(),
-                date: date.trim(),
+                publishDate: date.trim(),
                 author: author.trim(),
                 url: url,
                 extractedAt: new Date().toISOString()
@@ -359,8 +359,8 @@ class ScrapingEngine {
         data.title = data.title.replace(/\s+/g, ' ').trim();
 
         // Ajout de la date si manquante
-        if (!data.date) {
-            data.date = new Date().toISOString().split('T')[0];
+        if (!data.publishDate) {
+            data.publishDate = new Date().toISOString().split('T')[0];
         }
 
         return data;

@@ -280,9 +280,9 @@ export class ArticleRepository extends BaseRepository {
                     content
                 };
 
-                // Ajouter date si fournie
+                // Ajouter date de publication si fournie
                 if (datePublication) {
-                    updateData.date = datePublication;
+                    updateData.publishDate = datePublication;
                 }
 
                 return await this.update(existingArticle.id, updateData);
@@ -295,7 +295,7 @@ export class ArticleRepository extends BaseRepository {
                 throw new Error(`URL invalide: ${url}`);
             }
 
-            // Données de base (colonnes réelles: id, created_at, url, title, content, date)
+            // Données de base (colonnes réelles: id, created_at, url, title, content, publishDate)
             const baseData = {
                 url: url,
                 title,
@@ -303,9 +303,9 @@ export class ArticleRepository extends BaseRepository {
                 created_at: new Date().toISOString()
             };
 
-            // Ajouter date si fournie
+            // Ajouter date de publication si fournie
             if (datePublication) {
-                baseData.date = datePublication;
+                baseData.publishDate = datePublication;
             }
 
             const newArticle = await this.create(baseData);

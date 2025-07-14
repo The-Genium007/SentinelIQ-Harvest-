@@ -145,7 +145,7 @@ class ContentProcessor {
                 title: '',
                 content: '',
                 author: '',
-                date: '',
+                publishDate: '',
                 metadata: {},
                 extractedAt: new Date().toISOString()
             };
@@ -159,7 +159,7 @@ class ContentProcessor {
             // Extraction des métadonnées si demandé
             if (extractOptions.extractMetadata) {
                 result.author = this.extractAuthor();
-                result.date = this.extractDate();
+                result.publishDate = this.extractDate();
                 result.metadata = this.extractMetadata();
             }
 
