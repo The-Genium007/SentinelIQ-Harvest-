@@ -1,6 +1,14 @@
-# Changelog
+# Changel### 🚨 HOTFIX Critique
+- **Chromium Alpine Linux** - Installation de Chromium et dépendances dans le container Alpine
+- **Configuration Puppeteer Container** - Résolution de l'erreur "Protocol error (Security.setIgnoreCertificateErrors)"
+- **Variables d'environnement** - `PUPPETEER_EXECUTABLE_PATH` et `PUPPETEER_DISABLE_SECURITY` configurables
+- **Déploiement production** - Configuration optimisée pour environnement conteneurisé
 
-Toutes les modifications notables de ce projet seront documentées dans ce fichier.
+### 🔧 Améliorations Container
+- **Arguments Chromium étendus** - 25+ flags pour compatibilité conteneur maximale
+- **Désactivation sécurité SSL** - Contournement des limitations Docker/Alpine
+- **Mode single-process** - Optimisation pour ressources limitées du conteneur
+- **Test simplifié** - Validation Puppeteer sans dépendances externesoutes les modifications notables de ce projet seront documentées dans ce fichier.
 
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Versioning Sémantique](https://semver.org/lang/fr/).
