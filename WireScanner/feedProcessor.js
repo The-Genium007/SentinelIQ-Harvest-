@@ -7,6 +7,7 @@ import Parser from 'rss-parser';
 import { logger } from '../utils/logger.js';
 import { performanceManager } from './performanceManager.js';
 import { RSS_CONFIG, PERFORMANCE_CONFIG } from './config.js';
+import { rssRepository } from '../database/rssRepository.js';
 
 class FeedProcessor {
     constructor() {
@@ -48,11 +49,27 @@ class FeedProcessor {
 
             performanceManager.incrementMetric('processedFeeds');
 
+            // Marquer le flux comme valide s'il était précédemment invalide
+            try {
+                await rssRepository.markAsValid(url);
+            } catch (dbError) {
+                logger.debug(`⚠️ Erreur marquage flux valide ${url}: ${dbError.message}`, 'FeedProcessor');
+                // Ne pas faire échouer le parsing pour cette erreur de DB
+            }
+
             return validatedFeed;
 
         } catch (error) {
             performanceManager.incrementMetric('errors');
             logger.error(`❌ Erreur parsing flux ${url}: ${error.message}`, 'FeedProcessor');
+
+            // Marquer le flux comme invalide en base de données
+            try {
+                await rssRepository.markAsInvalid(url, error.message);
+            } catch (dbError) {
+                logger.error(`❌ Erreur marquage flux invalide ${url}: ${dbError.message}`, 'FeedProcessor');
+            }
+
             throw new Error(`Échec du parsing pour ${url}: ${error.message}`);
         }
     }

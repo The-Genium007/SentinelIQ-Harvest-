@@ -16,25 +16,29 @@ export class RssRepository extends BaseRepository {
 
     /**
      * 📋 Récupère tous les flux RSS actifs
-     * @param {boolean} activeOnly - Ne récupérer que les flux actifs (ignoré - pas de colonne active)
+     * @param {boolean} activeOnly - Ne récupérer que les flux actifs (incluant valid=true)
      * @returns {Promise<Array>} Liste des flux RSS
      */
     async getAllFeeds(activeOnly = true) {
         try {
-            // Note: la table ListUrlRss n'a que id, created_at et url
-            // Il n'y a pas de colonne 'active' dans cette table
+            // Inclure la colonne 'valid' dans la sélection
+            const filters = activeOnly ? { valid: true } : {};
+
             const feeds = await this.findAll({
-                select: 'id, url, created_at',
+                select: 'id, url, created_at, valid',
+                filters: filters, // Utiliser 'filters' au lieu de 'where'
                 order: { column: 'created_at', ascending: false }
             });
 
-            logManager.info(`${feeds.length} flux RSS récupérés`, 'RssRepository');
+            // Log simplifié pour éviter surcharge
+            logManager.info(`📡 ${feeds.length} flux RSS récupérés`, 'RssRepository');
             return feeds.map(feed => ({
                 id: feed.id,
                 url_rss: feed.url, // Conversion pour compatibilité
                 url: feed.url,
                 created_at: feed.created_at,
-                active: true // Tous considérés comme actifs par défaut
+                valid: feed.valid ?? true, // Par défaut true si null
+                active: feed.valid ?? true // Compatibilité: active = valid
             }));
 
         } catch (error) {
@@ -267,6 +271,114 @@ export class RssRepository extends BaseRepository {
 
         } catch (error) {
             logManager.error(`Erreur lors du calcul des statistiques: ${error.message}`, 'RssRepository');
+            throw error;
+        }
+    }
+
+    /**
+     * ❌ Marque un flux RSS comme invalide en cas d'erreur de parsing
+     * @param {string} url - URL du flux RSS en erreur
+     * @param {string} errorMessage - Message d'erreur pour le log
+     * @returns {Promise<boolean>} True si mis à jour avec succès
+     */
+    async markAsInvalid(url, errorMessage = null) {
+        try {
+            if (!url) {
+                throw new Error('URL requise');
+            }
+
+            // Trouver le flux par URL
+            const feed = await this.findByUrl(url);
+            if (!feed) {
+                logManager.warn(`Flux RSS non trouvé pour marquage invalide: ${url}`, 'RssRepository');
+                return false;
+            }
+
+            // Mettre à jour le statut valid à false
+            const updateResult = await this.update(feed.id, { valid: false });
+
+            if (updateResult) {
+                logManager.warn(`📛 Flux RSS marqué comme invalide: ${url}${errorMessage ? ` (${errorMessage})` : ''}`, 'RssRepository');
+                return true;
+            }
+
+            return false;
+
+        } catch (error) {
+            logManager.error(`Erreur lors du marquage invalide: ${error.message}`, 'RssRepository');
+            return false;
+        }
+    }
+
+    /**
+     * ✅ Marque un flux RSS comme valide (réhabilitation)
+     * @param {string} url - URL du flux RSS à réhabiliter
+     * @returns {Promise<boolean>} True si mis à jour avec succès
+     */
+    async markAsValid(url) {
+        try {
+            if (!url) {
+                throw new Error('URL requise');
+            }
+
+            // Trouver le flux par URL
+            const feed = await this.findByUrl(url);
+            if (!feed) {
+                logManager.warn(`Flux RSS non trouvé pour marquage valide: ${url}`, 'RssRepository');
+                return false;
+            }
+
+            // Mettre à jour le statut valid à true
+            const updateResult = await this.update(feed.id, { valid: true });
+
+            if (updateResult) {
+                // Réduction des logs pour éviter surcharge - passage en debug
+                if (Math.random() < 0.1) { // Log seulement 10% des succès
+                    logManager.debug(`✅ Flux RSS marqué comme valide: ${url}`, 'RssRepository');
+                }
+                return true;
+            }
+
+            return false;
+
+        } catch (error) {
+            logManager.error(`Erreur lors du marquage valide: ${error.message}`, 'RssRepository');
+            return false;
+        }
+    }
+
+    /**
+     * 🔍 Récupère tous les flux RSS avec filtrage côté client (workaround)
+     * @param {boolean} activeOnly - Si true, ne récupère que les flux valides
+     * @returns {Promise<Array>} Liste des flux RSS
+     */
+    async getAllFeedsClientFilter(activeOnly = true) {
+        try {
+            // Récupérer tous les flux sans filtre
+            const allFeeds = await this.findAll({
+                select: 'id, url, created_at, valid',
+                order: { column: 'created_at', ascending: false }
+            });
+
+            // Filtrage côté client
+            const filteredFeeds = activeOnly
+                ? allFeeds.filter(feed => feed.valid === true)
+                : allFeeds;
+
+            // Log simplifié pour éviter surcharge  
+            logManager.info(`📡 ${filteredFeeds.length} flux RSS filtrés`, 'RssRepository');
+
+            return filteredFeeds.map(feed => ({
+                id: feed.id,
+                url_rss: feed.url, // Conversion pour compatibilité
+                url: feed.url,
+                created_at: feed.created_at,
+                valid: feed.valid ?? true, // Par défaut true si null
+                active: feed.valid ?? true // Compatibilité: active = valid
+            }));
+
+        } catch (error) {
+            logManager.error(`Erreur lors de la récupération des flux RSS (client filter): ${error.message}`, 'RssRepository');
             throw error;
         }
     }

@@ -24,7 +24,7 @@ export async function launchCortex(options = {}) {
 
         try {
             // Lancer le processus Cortex avec scrapArticles.js
-            const cortexProcess = spawn('node', ['Cortex/scrapArticles.js'], {
+            const cortexProcess = spawn('node', ['process-articles.mjs'], {
                 cwd: process.cwd(),
                 stdio: ['ignore', 'pipe', 'pipe'],
                 detached: false
@@ -156,16 +156,20 @@ export async function launchCortexWithRetry(options = {}) {
 export async function integrateWithCortex(scrapingResults = {}) {
     try {
         const {
-            articleCount = 0,
+            articleCount = scrapingResults.articles || 0, // Support pour les deux formats
+            articles = 0,
             feedCount = 0,
             errors = []
         } = scrapingResults;
 
+        // Utiliser le bon compteur d'articles
+        const actualArticleCount = articleCount || articles || 0;
+
         logManager.info(`🔗 Intégration WireScanner → Cortex`, 'WireScanner');
-        logManager.info(`📊 Résultats: ${articleCount} articles, ${feedCount} flux, ${errors.length} erreurs`, 'WireScanner');
+        logManager.info(`📊 Résultats: ${actualArticleCount} articles, ${feedCount} flux, ${errors.length} erreurs`, 'WireScanner');
 
         // Ne lancer Cortex que s'il y a des articles à traiter
-        if (articleCount > 0) {
+        if (actualArticleCount > 0) {
             logManager.info('✅ Articles disponibles, lancement de Cortex', 'WireScanner');
             return await launchCortexWithRetry({
                 wait: true,

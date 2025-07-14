@@ -8,6 +8,7 @@ import { performanceManager } from './performanceManager.js';
 import { feedProcessor } from './feedProcessor.js';
 import { dataManager } from './dataManager.js';
 import { getConfig } from './config.js';
+import { integrateWithCortex } from './cortexIntegration.js';
 
 class WireScanner {
     constructor() {
@@ -192,7 +193,7 @@ class WireScanner {
     }
 
     /**
-     * Finalisation du crawling avec métriques
+     * Finalisation du crawling avec métriques et intégration Cortex
      * @param {Object} saveResults - Résultats de la sauvegarde
      * @returns {Promise<Object>} Résultats finaux
      */
@@ -236,7 +237,44 @@ class WireScanner {
         // Log du résumé final
         this.logFinalSummary(finalResults);
 
+        // 🚀 INTÉGRATION AUTOMATIQUE AVEC CORTEX
+        await this.launchCortexIntegration(finalResults);
+
         return finalResults;
+    }
+
+    /**
+     * Lance automatiquement Cortex après le scraping WireScanner
+     * @param {Object} scrapingResults - Résultats du scraping
+     */
+    async launchCortexIntegration(scrapingResults) {
+        try {
+            logger.info('🔗 Lancement automatique de l\'intégration Cortex', 'WireScanner');
+
+            // Vérifier s'il y a des articles à traiter
+            if (scrapingResults.articles > 0) {
+                logger.info(`📊 ${scrapingResults.articles} nouveaux articles détectés, lancement de Cortex`, 'WireScanner');
+
+                // Petite attente pour la propagation en base
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Lancer Cortex avec les résultats du scraping
+                const cortexSuccess = await integrateWithCortex(scrapingResults);
+
+                if (cortexSuccess) {
+                    logger.success('✅ Intégration Cortex terminée avec succès', 'WireScanner');
+                } else {
+                    logger.warning('⚠️ Intégration Cortex terminée avec avertissements', 'WireScanner');
+                }
+            } else {
+                logger.info('⏭️ Aucun nouvel article, intégration Cortex non nécessaire', 'WireScanner');
+            }
+
+        } catch (error) {
+            logger.error(`❌ Erreur lors de l'intégration Cortex: ${error.message}`, 'WireScanner');
+            // Ne pas faire échouer le scraping si Cortex échoue
+            logger.info('ℹ️ Le scraping a réussi malgré l\'échec de Cortex', 'WireScanner');
+        }
     }
 
     /**

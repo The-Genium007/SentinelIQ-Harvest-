@@ -83,8 +83,8 @@ class CortexPerformanceManager {
     /**
      * Termine un batch de scraping
      */
-    endBatch(batchId) {
-        logger.debug(`✅ Batch terminé: ${batchId}`, 'CortexPerformanceManager');
+    endBatch(batchId, batchResults = null) {
+        const message = batchResults ? `✅ Batch terminé: ${batchId} (${batchResults.scraped}/${batchResults.processed} articles)` : `✅ Batch terminé: ${batchId}`; logger.debug(message, 'CortexPerformanceManager');
     }
 
     /**

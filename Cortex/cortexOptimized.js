@@ -226,7 +226,7 @@ class CortexOptimized {
 
         // Traitement concurrent avec limitation
         const concurrentLimit = Math.min(
-            PERFORMANCE_CONFIG.CONCURRENT_ARTICLES,
+            PERFORMANCE_CONFIG.MAX_CONCURRENT_ARTICLES,
             Math.ceil(articles.length / 2)
         );
 
@@ -346,7 +346,7 @@ class CortexOptimized {
     createOptimalChunks(articles) {
         const systemStatus = cortexPerformanceManager.getSystemStatus();
 
-        let chunkSize = PERFORMANCE_CONFIG.CONCURRENT_ARTICLES;
+        let chunkSize = PERFORMANCE_CONFIG.MAX_CONCURRENT_ARTICLES;
 
         // Adaptation selon les ressources système
         if (systemStatus.memoryUsage > 70) {

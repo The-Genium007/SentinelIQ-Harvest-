@@ -147,20 +147,12 @@ class CortexDataManager {
                 }
             }
 
-            // Préparation des données pour la base
+            // Préparation des données pour la base (schéma réel: id, created_at, url, title, content, date)
             const dbData = {
                 url: validatedData.url,
                 title: validatedData.title,
                 content: validatedData.content,
-                dateRecuperation: new Date().toISOString(),
-                datePublication: validatedData.date || new Date().toISOString(),
-                source: 'Cortex',
-                metadata: {
-                    author: validatedData.author,
-                    extractedAt: validatedData.extractedAt,
-                    contentLength: validatedData.content.length,
-                    processingVersion: '2.0.0'
-                }
+                date: this.formatDateForDB(validatedData.date)
             };
 
             // Insertion dans la base
@@ -386,6 +378,36 @@ class CortexDataManager {
         };
 
         logger.info('🔄 CortexDataManager réinitialisé', 'CortexDataManager');
+    }
+
+    /**
+     * Formate une date pour la base de données (format YYYY-MM-DD)
+     * @param {string|Date} date - Date à formater
+     * @returns {string} Date au format YYYY-MM-DD
+     */
+    formatDateForDB(date) {
+        if (!date) {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        try {
+            // Si c'est déjà au bon format YYYY-MM-DD
+            if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                return date;
+            }
+
+            // Convertir en objet Date puis extraire YYYY-MM-DD
+            const dateObj = new Date(date);
+            if (isNaN(dateObj.getTime())) {
+                // Date invalide, utiliser la date du jour
+                return new Date().toISOString().split('T')[0];
+            }
+
+            return dateObj.toISOString().split('T')[0];
+        } catch (error) {
+            // En cas d'erreur, retourner la date du jour
+            return new Date().toISOString().split('T')[0];
+        }
     }
 }
 

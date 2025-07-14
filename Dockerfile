@@ -15,6 +15,7 @@ RUN npm ci --frozen-lockfile --production
 ENV PORT=3000
 ENV NODE_ENV=production
 ENV HEALTH_PORT=3000
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 # Copier et configurer le script de healthcheck
 COPY healthcheck.sh /usr/local/bin/healthcheck.sh

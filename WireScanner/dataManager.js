@@ -30,17 +30,15 @@ class DataManager {
     }
 
     /**
-     * Récupère tous les flux RSS actifs avec cache
-     * @returns {Promise<Array>} Liste des flux RSS
+     * Récupère tous les flux RSS valides avec cache
+     * @returns {Promise<Array>} Liste des flux RSS valides
      */
     async getAllRssFeeds() {
         try {
-            logger.debug('📡 Récupération des flux RSS', 'DataManager');
+            logger.debug('📡 Récupération des flux RSS valides', 'DataManager');
 
-            const feeds = await this.rssRepo.findAll({
-                where: { active: true },
-                orderBy: { created_at: 'DESC' }
-            });
+            // Utiliser la nouvelle méthode getAllFeedsClientFilter qui respecte la colonne valid
+            const feeds = await this.rssRepo.getAllFeedsClientFilter(true); // activeOnly = true pour récupérer seulement valid=true
 
             this.stats.queriesExecuted++;
 
@@ -50,11 +48,12 @@ class DataManager {
                 url: feed.url_rss || feed.url,
                 title: feed.titre || feed.title,
                 description: feed.description,
-                active: feed.active,
+                active: feed.valid, // Utiliser valid au lieu d'active
+                valid: feed.valid,
                 created_at: feed.created_at
             }));
 
-            logger.info(`✅ ${formattedFeeds.length} flux RSS actifs récupérés`, 'DataManager');
+            logger.info(`✅ ${formattedFeeds.length} flux RSS valides récupérés`, 'DataManager');
             return formattedFeeds;
 
         } catch (error) {
@@ -108,7 +107,7 @@ class DataManager {
             url: article.url,
             title: article.title || '',
             description: article.description || '',
-            datePublication: article.publishDate || new Date().toISOString(),
+            publishDate: article.publishDate || new Date().toISOString(),
             source: 'WireScanner',
             ...article
         });

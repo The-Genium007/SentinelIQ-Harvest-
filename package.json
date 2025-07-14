@@ -1,6 +1,6 @@
 {
   "name": "sentineliq-harvest",
-  "version": "1.0.0",
+  "version": "2.5.0",
   "description": "SentinelIQ Harvest - Système de collecte et d'analyse d'articles",
   "main": "index.js",
   "type": "module",
@@ -8,29 +8,33 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "wire-scanner": "node WireScanner/start.js",
-    "wire-scanner:direct": "node -e \"import('./WireScanner/crawlUrl.js').then(m => m.crawlUrl())\"",
-    "wire-scanner:migrate": "TEST_MIGRATION=1 node WireScanner/migration.js",
-    "wire-scanner:benchmark": "node -e \"console.log('Benchmark WireScanner à implémenter')\"",
-    "scrapping": "node run-scrapping.js",
-    "cortex": "node Cortex/start.js",
-    "cortex:daemon": "node Cortex/daemon.js",
-    "cortex:once": "node Cortex/daemon.js --once",
-    "cortex:test": "node Cortex/platformTester.js",
-    "cortex:test-platform": "node Cortex/platformTester.js",
-    "cortex:install": "node Cortex/platformInstaller.js",
-    "diagnostic": "node diagnostic.js",
-    "logs:migrate": "node migrate-logs.js migrate",
-    "logs:clean": "node diagnostic.js clean",
-    "logs:analyze": "node diagnostic.js analyze",
-    "logs:summary": "node diagnostic.js summary",
-    "logs:test": "node test-logs.js",
-    "db:test": "node test-simple.js",
-    "db:test-full": "node test-database.js",
-    "db:compatibility": "node test-compatibility.js",
-    "db:schema": "node diagnostic-tables.js",
-    "db:health": "node -e \"import('./database/index.js').then(async ({DatabaseUtils}) => { const h = await DatabaseUtils.healthCheck(); console.log(JSON.stringify(h, null, 2)); })\"",
-    "db:stats": "node -e \"import('./database/index.js').then(async ({DatabaseUtils}) => { const s = await DatabaseUtils.getGlobalStats(); console.log(JSON.stringify(s, null, 2)); })\""
+    
+    "harvest": "node scripts/automation/auto-integration.mjs",
+    "harvest:auto": "node scripts/automation/smart-automation.mjs",
+    "harvest:collect": "node -e \"import('./WireScanner/crawlUrl.js').then(m => m.crawlUrl())\"",
+    "harvest:process": "node process-articles.mjs",
+    "harvest:test": "node scripts/automation/test-integration-complete.mjs",
+    
+    "status": "node scripts/automation/monitor-pipeline.mjs",
+    "status:watch": "node scripts/automation/monitor-pipeline.mjs --watch",
+    "status:json": "node scripts/automation/monitor-pipeline.mjs --json",
+    
+    "health": "node -e \"import('./database/index.js').then(async ({DatabaseUtils}) => { const h = await DatabaseUtils.healthCheck(); console.log(JSON.stringify(h, null, 2)); })\"",
+    "stats": "node -e \"import('./database/index.js').then(async ({DatabaseUtils}) => { const s = await DatabaseUtils.getGlobalStats(); console.log(JSON.stringify(s, null, 2)); })\"",
+    
+    "diagnostic": "node scripts/maintenance/diagnostic.js",
+    "logs:clean": "node scripts/maintenance/diagnostic.js clean",
+    "logs:summary": "node scripts/maintenance/diagnostic.js summary",
+    
+    "rss:list": "node scripts/maintenance/manage-rss-feeds.js list",
+    "rss:stats": "node scripts/maintenance/manage-rss-feeds.js stats",
+    
+    "_legacy:wire-scanner": "node WireScanner/start.js",
+    "_legacy:cortex": "node Cortex/start.js",
+    "_legacy:cortex-daemon": "node Cortex/daemon.js",
+    "_test:db": "node scripts/legacy/simple-test.cjs",
+    "_test:schema": "node scripts/tests/test-columns.js",
+    "_test:rss": "node scripts/tests/test-valid-feeds-only.js"
   },
   "keywords": [
     "sentinel",

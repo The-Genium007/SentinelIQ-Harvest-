@@ -1,4 +1,7 @@
-# Politique de Sécurité
+# Poli| Version | Supportée          | Statut                                            |
+|---------|-------------------|---------------------------------------------------|
+| 2.5.x   | :white_check_mark: | Version actuelle (Pipeline optimisé + automatisation intelligente) |
+| 2.0.x   | :white_check_mark: | Version stable (Cortex + WireScanner optimisés) |ue de Sécurité
 
 ## Versions Supportées
 
@@ -121,4 +124,4 @@ Pour toute question relative à la sécurité :
 ---
 
 _Dernière mise à jour : 13 juillet 2025_
-_Version du document : 2.0_
+_Version du document : 2.5_

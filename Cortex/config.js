@@ -8,7 +8,7 @@ export const PERFORMANCE_CONFIG = {
     MAX_CONCURRENT_ARTICLES: 3,        // Nombre max d'articles scrapés en parallèle
     MAX_CONCURRENT_BROWSERS: 2,        // Nombre max de navigateurs Puppeteer simultanés
     BROWSER_POOL_SIZE: 2,              // Taille du pool de navigateurs réutilisables
-    PAGE_TIMEOUT: 30000,               // Timeout pour le chargement des pages (30s)
+    PAGE_TIMEOUT: 10000,               // Timeout pour le chargement des pages (10s)
     MEMORY_THRESHOLD: 150,             // Seuil mémoire en MB pour pause GC
 
     // Délais et retry
@@ -91,7 +91,7 @@ export const CONTENT_CONFIG = {
 
     // Filtres de qualité
     MIN_PARAGRAPH_COUNT: 2,
-    MIN_WORDS_COUNT: 50,
+    MIN_WORDS_COUNT: 10,
     MAX_WORDS_COUNT: 10000,
 
     // Enrichissement
