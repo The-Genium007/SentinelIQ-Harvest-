@@ -49,6 +49,15 @@ class ScrapingEngine {
 
         } catch (error) {
             logger.error(`❌ Erreur initialisation pool navigateurs: ${error.message}`, 'ScrapingEngine');
+            
+            // En production/conteneur, on continue sans Puppeteer
+            if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
+                logger.warn('⚠️ Initialisation ScrapingEngine en mode dégradé (sans Puppeteer)', 'ScrapingEngine');
+                this.isInitialized = true;
+                this.poolSize = 0;
+                return;
+            }
+            
             throw error;
         }
     }
@@ -106,6 +115,11 @@ class ScrapingEngine {
     async getBrowser() {
         if (!this.isInitialized) {
             await this.initialize();
+        }
+
+        // En mode conteneur/production, on refuse l'utilisation de Puppeteer
+        if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
+            throw new Error('Puppeteer non disponible en mode conteneur - utiliser un mode alternatif');
         }
 
         // Essayer de récupérer un navigateur du pool

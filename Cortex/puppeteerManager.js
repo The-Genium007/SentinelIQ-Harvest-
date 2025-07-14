@@ -128,6 +128,12 @@ class PuppeteerManager {
             await this.initialize();
         }
 
+        // En production/conteneur, on évite Puppeteer qui pose trop de problèmes
+        if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
+            logger.warn('⚠️ Mode conteneur détecté - Puppeteer désactivé pour éviter les erreurs', 'PuppeteerManager');
+            throw new Error('Puppeteer désactivé en mode conteneur pour stabilité');
+        }
+
         try {
             logger.debug('🌐 Création d\'un nouveau navigateur Puppeteer', 'PuppeteerManager');
 
