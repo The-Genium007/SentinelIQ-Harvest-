@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  sentineliq-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.local-test
+    container_name: sentineliq-harvest-test
+    ports:
+      - "3000:3000"
+    environment:
+      # Variables identiques à Coolify
+      - NODE_ENV=production
+      - PORT=3000
+      - HEALTH_PORT=3000
+      - NODE_OPTIONS=--max-old-space-size=2048
+      - DOCKER_ENV=true
+      - PUPPETEER_DISABLE_SECURITY=true
+      # ⚠️ Remplace par tes vraies variables Supabase
+      - SUPABASE_URL=your_supabase_url_here
+      - SUPABASE_ANON_KEY=your_supabase_anon_key_here
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Logs pour debug
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

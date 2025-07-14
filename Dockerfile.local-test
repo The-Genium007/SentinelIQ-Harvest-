@@ -1,0 +1,47 @@
+# Image identique à Coolify - Alpine Linux Node.js 18
+FROM node:18-alpine
+
+# Variables d'environnement identiques à Coolify
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HEALTH_PORT=3000
+ENV NODE_OPTIONS=--max-old-space-size=2048
+ENV DOCKER_ENV=true
+ENV PUPPETEER_DISABLE_SECURITY=true
+
+# Installation des dépendances Alpine (identique au Dockerfile prod)
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    fonts-liberation \
+    bash \
+    curl
+
+# Configuration Puppeteer pour Alpine
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Créer le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+
+# Installer les dépendances Node.js
+RUN npm install --production
+
+# Copier le code source
+COPY . .
+
+# Exposer le port
+EXPOSE 3000
+
+# Healthcheck identique à la production
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Commande de démarrage
+CMD ["npm", "start"]

@@ -51,6 +51,20 @@ SUPABASE_ANON_KEY=your_supabase_anon_key_here
 - **Build args:** Aucun nécessaire
 - **Volumes:** Aucun nécessaire (logs en container)
 
+## 🧪 Test Local avec Conditions Identiques
+
+Pour déboguer efficacement avant déploiement Coolify :
+
+```bash
+# Configuration de test local avec environnement Alpine identique
+./start-test.sh
+
+# Debug rapide des problèmes
+./debug-quick.sh
+```
+
+Voir `docs/LOCAL_COOLIFY_TEST.md` pour le guide complet.
+
 ## 📝 Points d'attention
 1. **Variables Supabase:** Configurez impérativement SUPABASE_URL et SUPABASE_ANON_KEY
 2. **Health endpoint:** L'application expose `/health`, `/ready`, et `/metrics`
