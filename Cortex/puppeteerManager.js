@@ -43,7 +43,7 @@ class PuppeteerManager {
             // Test de compatibilité Puppeteer
             const testResult = await this.testPuppeteerCompatibility();
             if (!testResult) {
-                logger.warn('⚠️ Test Puppeteer échoué, mais initialisation continuée', 'PuppeteerManager');
+                logger.warning('⚠️ Test Puppeteer échoué, mais initialisation continuée', 'PuppeteerManager');
             }
 
             this.isInitialized = true;
@@ -56,7 +56,7 @@ class PuppeteerManager {
             
             // En cas d'erreur critique, on continue quand même pour les conteneurs
             if (process.env.NODE_ENV === 'production') {
-                logger.warn('⚠️ Initialisation PuppeteerManager en mode dégradé (production)', 'PuppeteerManager');
+                logger.warning('⚠️ Initialisation PuppeteerManager en mode dégradé (production)', 'PuppeteerManager');
                 this.isInitialized = true;
                 return this.platformConfig;
             }
@@ -109,11 +109,11 @@ class PuppeteerManager {
 
             // Suggestions de résolution selon la plateforme
             if (this.platformConfig.IS_DEBIAN) {
-                logger.warn('💡 Pour Debian/Ubuntu, installez: sudo apt-get install chromium-browser', 'PuppeteerManager');
-                logger.warn('💡 Ou: sudo apt-get install google-chrome-stable', 'PuppeteerManager');
+                logger.warning('💡 Pour Debian/Ubuntu, installez: sudo apt-get install chromium-browser', 'PuppeteerManager');
+                logger.warning('💡 Ou: sudo apt-get install google-chrome-stable', 'PuppeteerManager');
             } else if (this.platformConfig.IS_MACOS) {
-                logger.warn('💡 Pour macOS, installez: brew install chromium', 'PuppeteerManager');
-                logger.warn('💡 Ou téléchargez Chrome depuis https://www.google.com/chrome/', 'PuppeteerManager');
+                logger.warning('💡 Pour macOS, installez: brew install chromium', 'PuppeteerManager');
+                logger.warning('💡 Ou téléchargez Chrome depuis https://www.google.com/chrome/', 'PuppeteerManager');
             }
 
             return false;
@@ -130,7 +130,7 @@ class PuppeteerManager {
 
         // En production/conteneur, on évite Puppeteer qui pose trop de problèmes
         if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
-            logger.warn('⚠️ Mode conteneur détecté - Puppeteer désactivé pour éviter les erreurs', 'PuppeteerManager');
+            logger.warning('⚠️ Mode conteneur détecté - Puppeteer désactivé pour éviter les erreurs', 'PuppeteerManager');
             throw new Error('Puppeteer désactivé en mode conteneur pour stabilité');
         }
 

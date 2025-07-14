@@ -52,7 +52,7 @@ class ScrapingEngine {
             
             // En production/conteneur, on continue sans Puppeteer
             if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
-                logger.warn('⚠️ Initialisation ScrapingEngine en mode dégradé (sans Puppeteer)', 'ScrapingEngine');
+                logger.warning('⚠️ Initialisation ScrapingEngine en mode dégradé (sans Puppeteer)', 'ScrapingEngine');
                 this.isInitialized = true;
                 this.poolSize = 0;
                 return;
