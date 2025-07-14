@@ -38,8 +38,17 @@ const startService = (serviceName, scriptPath) => {
                     return;
                 }
 
+                // Services "one-shot" qui se terminent normalement après leur travail
+                if (serviceName.toLowerCase().includes('cortex') && error.code === 0) {
+                    log(`✅ ${serviceName}: Session terminée normalement`, LOG_LEVELS.SUCCESS);
+                    serviceStatus.cortex = true;
+                    resolve('Service one-shot terminé avec succès');
+                    return;
+                }
+
                 log(`❌ Erreur lors du démarrage de ${serviceName}: ${error.message}`, LOG_LEVELS.ERROR);
-                // Marquer le service comme échoué
+                log(`❌ ${serviceName} error: ${error.message}`, LOG_LEVELS.ERROR);
+                // Marquer le service comme échoué seulement si ce n'est pas une terminaison normale
                 if (serviceName.toLowerCase().includes('diagnostic')) serviceStatus.diagnostic = false;
                 if (serviceName.toLowerCase().includes('wirescanner')) serviceStatus.wireScanner = false;
                 if (serviceName.toLowerCase().includes('cortex')) serviceStatus.cortex = false;
@@ -146,10 +155,20 @@ const startServiceWithSpawn = (serviceName, scriptPath) => {
                 hasResolved = true;
                 if (code === 0) {
                     log(`✅ ${serviceName} terminé normalement`, LOG_LEVELS.SUCCESS);
+                    // Pour les services one-shot comme Cortex, marquer comme réussi
+                    if (serviceName.toLowerCase().includes('cortex')) {
+                        serviceStatus.cortex = true;
+                    }
                     resolve('Service terminé avec succès');
                 } else {
                     log(`❌ ${serviceName} terminé avec erreur (code: ${code})`, LOG_LEVELS.ERROR);
                     reject(new Error(`Service terminé avec code ${code}`));
+                }
+            } else {
+                // Si déjà résolu par timeout mais le processus se termine normalement
+                if (code === 0 && serviceName.toLowerCase().includes('cortex')) {
+                    log(`✅ ${serviceName} session terminée après démarrage`, LOG_LEVELS.SUCCESS);
+                    serviceStatus.cortex = true;
                 }
             }
         });
@@ -342,11 +361,21 @@ async function main() {
                 serviceStatus.wireScanner = false;
             });
 
-        // Démarrer Cortex avec la méthode standard
+        // Démarrer Cortex avec gestion spéciale pour service one-shot
         startService('Cortex', 'Cortex/start.js')
+            .then(result => {
+                log(`✅ Cortex exécuté avec succès`, LOG_LEVELS.SUCCESS);
+                serviceStatus.cortex = true;
+            })
             .catch(err => {
-                log(`❌ Cortex error: ${err.message}`, LOG_LEVELS.ERROR);
-                serviceStatus.cortex = false;
+                // Pour Cortex, ne pas traiter la terminaison normale comme une erreur
+                if (err.message && err.message.includes('Service terminé avec code 0')) {
+                    log(`✅ Cortex session terminée normalement`, LOG_LEVELS.SUCCESS);
+                    serviceStatus.cortex = true;
+                } else {
+                    log(`❌ Cortex error: ${err.message}`, LOG_LEVELS.ERROR);
+                    serviceStatus.cortex = false;
+                }
             });
 
         log('✅ Tous les services ont été initialisés', LOG_LEVELS.SUCCESS);

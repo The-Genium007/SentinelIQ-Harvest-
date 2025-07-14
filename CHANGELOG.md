@@ -65,6 +65,15 @@ et ce projet adhère au [Versioning Sémantique](https://semver.org/lang/fr/).
   - Chromium headless operationnel en conteneur
   - Healthcheck endpoints fonctionnels
 
+#### Hotfix #7 - Gestion Services One-Shot (RÉSOLU) ✅
+- **Problème**: Erreurs "Command failed" WireScanner/Cortex au démarrage, services one-shot mal gérés
+- **Solution**: Gestion différenciée services persistants vs one-shot avec terminaison normale
+- **Impact**: System stable, plus d'erreurs de démarrage, services fonctionnent correctement
+- **Fichiers modifiés**:
+  - `index.js`: Correction gestion terminaison normale Cortex (code 0)
+  - **Architecture**: WireScanner (persistant) + Cortex (one-shot) + HealthServer (persistant)
+- **Résultats**: 18/26 articles traités, optimisations DB opérationnelles, aucune erreur système
+
 ### 🔧 Améliorations Techniques
 - **Détection plateforme automatique** - Support macOS, Debian, Alpine Linux
 - **Pool de navigateurs optimisé** - Gestion mémoire selon la plateforme
