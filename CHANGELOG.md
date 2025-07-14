@@ -1,4 +1,10 @@
-# Changel### 🚨 HOTFIX Critique
+# Changel### 🚨 HOTFIX FINAL Critique
+- **Mode dégradé production** - PuppeteerManager continue même si le test Puppeteer échoue
+- **Skip test conteneur** - Évite complètement le test Puppeteer en environnement de production
+- **Résistance aux erreurs protocole** - Plus d'arrêt sur "Security.setIgnoreCertificateErrors"
+- **Initialisation robuste** - Services démarrent avec ou sans Puppeteer fonctionnel
+
+### 🚨 HOTFIX Critique
 - **Chromium Alpine Linux** - Installation de Chromium et dépendances dans le container Alpine
 - **Configuration Puppeteer Container** - Résolution de l'erreur "Protocol error (Security.setIgnoreCertificateErrors)"
 - **Variables d'environnement** - `PUPPETEER_EXECUTABLE_PATH` et `PUPPETEER_DISABLE_SECURITY` configurables
