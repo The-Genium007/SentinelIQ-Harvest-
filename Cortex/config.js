@@ -269,7 +269,7 @@ export const PLATFORM_CONFIG = {
                 '--disable-plugins-discovery',
                 '--memory-pressure-off'
             ],
-            executablePath: '/usr/bin/chromium-browser', // Chemin Debian typique
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser', // Chemin configurable via env
         }
     },
 
@@ -312,13 +312,24 @@ export async function detectPlatform() {
 
     if (config.IS_LINUX) {
         try {
-            // Détection spécifique Debian
+            // Détection spécifique Debian/Alpine
             const fs = await import('fs');
-            const osRelease = fs.readFileSync('/etc/os-release', 'utf8');
+            let osRelease = '';
+            try {
+                osRelease = fs.readFileSync('/etc/os-release', 'utf8');
+            } catch (error) {
+                // Fallback pour Alpine ou autres distributions
+                osRelease = '';
+            }
+            
             config.IS_DEBIAN = osRelease.includes('debian') || osRelease.includes('ubuntu');
+            config.IS_ALPINE = osRelease.includes('alpine');
 
-            // Vérification de l'exécutable Chromium
-            const chromiumPaths = [
+            // Vérification de l'exécutable Chromium avec priorité Alpine
+            const chromiumPaths = config.IS_ALPINE ? [
+                '/usr/bin/chromium-browser', // Alpine Linux
+                '/usr/bin/chromium'
+            ] : [
                 '/usr/bin/chromium-browser',
                 '/usr/bin/chromium',
                 '/usr/bin/google-chrome',

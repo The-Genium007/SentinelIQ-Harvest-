@@ -3,8 +3,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Installer curl et netcat pour le healthcheck
-RUN apk add --no-cache curl netcat-openbsd && \
+# Installer curl, netcat et Chromium pour Puppeteer
+RUN apk add --no-cache \
+    curl \
+    netcat-openbsd \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont && \
     addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
@@ -16,6 +25,8 @@ ENV PORT=3000
 ENV NODE_ENV=production
 ENV HEALTH_PORT=3000
 ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Copier tout le code
 COPY . .
