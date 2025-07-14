@@ -27,6 +27,8 @@ ENV HEALTH_PORT=3000
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_DISABLE_SECURITY=true
+ENV CHROME_DEVEL_SANDBOX=/usr/bin/chromium-browser
 
 # Copier tout le code
 COPY . .

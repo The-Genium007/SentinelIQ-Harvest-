@@ -61,13 +61,28 @@ class PuppeteerManager {
         logger.info('🧪 Test de compatibilité Puppeteer', 'PuppeteerManager');
 
         try {
+            // Configuration simplifiée pour test en environnement conteneur
+            const isContainer = process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV;
+            const testConfig = isContainer ? {
+                ...this.puppeteerConfig,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox', 
+                    '--disable-dev-shm-usage',
+                    '--single-process',
+                    '--disable-gpu',
+                    '--disable-web-security',
+                    '--ignore-certificate-errors'
+                ]
+            } : this.puppeteerConfig;
+
             // Création directe sans passer par createBrowser() pour éviter la récursion
-            const browser = await puppeteer.launch(this.puppeteerConfig);
+            const browser = await puppeteer.launch(testConfig);
             const page = await browser.newPage();
 
-            // Test simple
+            // Test simple sans certificats SSL
             await page.goto('data:text/html,<h1>Test Puppeteer</h1>', {
-                waitUntil: 'networkidle0',
+                waitUntil: 'load', // Plus rapide que networkidle0
                 timeout: 10000
             });
 
