@@ -5,6 +5,18 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Versioning Sémantique](https://semver.org/lang/fr/).
 
+## [2.5.1] - 2025-07-14
+
+### 🐛 Corrigé
+- **Déploiement Docker** - Suppression de la référence au fichier `healthcheck.sh` manquant
+- **Healthcheck intégré** - Remplacement par un healthcheck curl utilisant l'endpoint `/health` existant
+- **Compatibilité Coolify** - Résolution des problèmes de déploiement sur Ionos VPS
+
+### 🔧 Technique
+- Simplification du Dockerfile pour éviter les dépendances de fichiers externes
+- Utilisation du endpoint `/health` déjà implémenté dans `index.js`
+- Optimisation de la phase de build Docker
+
 ## [2.5.0] - 2025-07-14
 
 ### 🚀 Ajouté
