@@ -58,3 +58,10 @@ bun.lockb
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# Debug and test files
+debug-insert-test.js
+test-cortex-flow.js
+test-minimal-insert.js
+test-*.js
+debug-*.js
