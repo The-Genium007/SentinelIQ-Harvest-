@@ -28,9 +28,5 @@ USER nodejs
 
 EXPOSE 3000
 
-# Healthcheck intégré simple
-HEALTHCHECK --interval=30s --timeout=15s --start-period=45s --retries=5 \
-    CMD curl -f http://localhost:3000/health || exit 1
-
 # Lancer le serveur principal avec healthcheck intégré
 CMD ["node", "index.js"]
