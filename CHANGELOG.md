@@ -7,15 +7,23 @@ et ce projet adhère au [Versioning Sémantique](https://semver.org/lang/fr/).
 
 ## [2.5.1] - 2025-07-14
 
-### 🐛 Corrigé
+### � HOTFIX Critique
+- **Chromium Alpine Linux** - Installation de Chromium et dépendances dans le container Alpine
+- **Configuration Puppeteer** - Support complet d'Alpine Linux avec détection automatique
+- **Variables d'environnement** - `PUPPETEER_EXECUTABLE_PATH` configurable pour flexibilité
+- **Déploiement production** - Résolution de l'erreur "Browser was not found at configured executablePath"
+
+### �🐛 Corrigé
 - **Déploiement Docker** - Suppression de la référence au fichier `healthcheck.sh` manquant
 - **Healthcheck intégré** - Remplacement par un healthcheck curl utilisant l'endpoint `/health` existant
 - **Compatibilité Coolify** - Résolution des problèmes de déploiement sur Ionos VPS
+- **Initialisation Puppeteer** - Correction de l'échec d'initialisation en production
 
 ### 🔧 Technique
+- Ajout des packages Alpine : `chromium`, `nss`, `freetype`, `harfbuzz`, `ca-certificates`, `ttf-freefont`
+- Configuration `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true` pour utiliser Chromium système
+- Détection intelligente Alpine/Debian pour configuration automatique
 - Simplification du Dockerfile pour éviter les dépendances de fichiers externes
-- Utilisation du endpoint `/health` déjà implémenté dans `index.js`
-- Optimisation de la phase de build Docker
 
 ## [2.5.0] - 2025-07-14
 
